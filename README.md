@@ -1,4 +1,4 @@
-# PDAT — Phishing Detection and Analysis Tool (Minimal Developer Edition)
+# PDAT — Phishing Detection and Analysis Tool 
 
 This package contains a lightweight, developer-friendly PDAT skeleton with a simple Flask backend and a React frontend (single-page). It's designed to be easy to run locally for testing and development.
 
