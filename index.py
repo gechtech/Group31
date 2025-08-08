@@ -3,6 +3,7 @@ from bs4 import BeautifulSoup
 import tldextract
 #modules must be imported pip install beautifulsoup4 requests tldextract scikit-learn pandas
 PHISHING_SIGNATURES = ["login.verify.com", "secure-update.com", "bit.ly"]
+#This is Phishing Detector
 
 def is_suspicious_url(url):
     score = 0
