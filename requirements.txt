@@ -1,0 +1,4 @@
+flask
+re
+tkinter
+detector
