@@ -37,7 +37,3 @@ This package contains a lightweight, developer-friendly PDAT skeleton with a sim
 2. The app will open at `http://localhost:3000` and call the backend at `http://localhost:5000` by default.
    To use a different backend base URL set `REACT_APP_API_BASE` env var before starting the frontend.
 
-## Notes & Next steps
-- This is a development skeleton. For production, integrate with the project's real backend, database, authentication, and secure file storage.
-- You can extend `backend/phishing_detector.py` (add ML models, feeds), and `backend/malware_scanner.py` (add YARA rules, VirusTotal integration).
-- If you want, I can patch this code directly into your original project ZIP or create a runnable Docker setup.
