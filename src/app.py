@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request
-from detector import analyze_input
+from src.detector import analyze_input
 
 app = Flask(__name__)
 
