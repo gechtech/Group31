@@ -197,6 +197,3 @@ For issues and questions:
 2. Review the API documentation
 3. Open an issue on GitHub
 
----
-
-**Note**: This tool is for educational and security testing purposes. Always ensure you have proper authorization before scanning systems or files that you don't own.
