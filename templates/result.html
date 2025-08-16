@@ -3,22 +3,75 @@
 <head>
     <title>Analysis Result</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        .container {
+            display: flex;
+            flex-direction: row;
+        }
+        .result-box {
+            flex: 3;
+            padding: 2em;
+        }
+        .sidebar {
+            flex: 1;
+            background: #f4f4f4;
+            padding: 1em;
+            border-left: 2px solid #ddd;
+            min-width: 250px;
+        }
+        .sidebar h3 {
+            margin-top: 0;
+        }
+        .suspicious { color: #b30000; }
+        .safe { color: #008000; }
+    </style>
 </head>
 <body>
-    <div class="result-box">
-        {% if result.is_suspicious %}
-            <h2 class="warning">⚠️ This message is {{ result.score }}% suspicious</h2>
-            <img src="{{ url_for('static', filename='warning.png') }}" width="100" alt="Warning">
-            <p class="be-careful">Be careful! This might be a phishing attempt.</p>
-            <ul>
-                {% for item in result.findings %}
-                    <li>{{ item }}</li>
-                {% endfor %}
-            </ul>
-        {% else %}
-            <h2 class="safe">✅ This message appears to be safe</h2>
-        {% endif %}
-        <a href="/">← Back to Form</a>
+    <div class="container">
+        <div class="result-box">
+            {% if result.is_suspicious %}
+                <h2 class="warning">⚠️ This message is {{ result.score }}% suspicious</h2>
+                <img src="{{ url_for('static', filename='warning.png') }}" width="100" alt="Warning">
+                <p class="be-careful">Be careful! This might be a phishing attempt.</p>
+                <ul>
+                    {% for item in result.findings %}
+                        <li>{{ item }}</li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <h2 class="safe">✅ This message appears to be safe</h2>
+            {% endif %}
+            <a href="/">← Back to Form</a>
+        </div>
+        <div class="sidebar">
+            <h3>Quid Pro Quo Detection</h3>
+            {% if quid_pro_quo_result %}
+                <p>
+                    <strong>Status:</strong>
+                    {% if quid_pro_quo_result.label == "suspicious" %}
+                        <span class="suspicious">Suspicious</span>
+                    {% else %}
+                        <span class="safe">Likely Safe</span>
+                    {% endif %}
+                </p>
+                <p><strong>Score:</strong> {{ quid_pro_quo_result.score }}</p>
+                <ul>
+                    {% for reason in quid_pro_quo_result.reasons %}
+                        <li>{{ reason }}</li>
+                    {% endfor %}
+                </ul>
+                <details>
+                    <summary>Triggers</summary>
+                    <ul>
+                        {% for key, value in quid_pro_quo_result.triggers.items() %}
+                            <li><strong>{{ key.capitalize() }}:</strong> {{ value|join(', ') if value else 'None' }}</li>
+                        {% endfor %}
+                    </ul>
+                </details>
+            {% else %}
+                <p>No analysis available.</p>
+            {% endif %}
+        </div>
     </div>
 </body>
 </html>
