@@ -38,7 +38,8 @@ def analyze_input(url, text):
     percentage = min(int((keyword_matches / 30) * 100), 100)
 
     return {
-        "is_suspicious": keyword_matches >= 6,
+        "is_suspicious": keyword_matches >= 3,
         "score": percentage,
         "findings": results,
+
     }
