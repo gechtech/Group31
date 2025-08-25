@@ -21,7 +21,7 @@ This tool is designed to be **useful for everyone** – from regular internet us
 
 ### 1️⃣ Clone the Repository
 ```bash
-https://github.com/gechtech/Group31.git
+git clone https://github.com/gechtech/Group31.git
 cd Group31
 ```
 
@@ -85,4 +85,5 @@ Whether you are:
 👨‍👩‍👧‍👦 An everyday user wanting to stay safe online
 
 JU gives you the power to detect threats easily and protect yourself from scams.
+
 
