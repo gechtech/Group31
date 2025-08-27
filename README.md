@@ -56,7 +56,7 @@ or
 ```bash
 pnpm dev
 ```
-This will start the app on:
+This will start the web app on:
 
 http://localhost:3000
 
@@ -85,6 +85,7 @@ Whether you are:
 👨‍👩‍👧‍👦 An everyday user wanting to stay safe online
 
 JU gives you the power to detect threats easily and protect yourself from scams.
+
 
 
 
