@@ -43,9 +43,9 @@ yarn install
 3️⃣ Set Up Environment Variables
 Create a .env.local file in the root directory and add:
 ```bash
-NEXT_PUBLIC_VIRUSTOTAL_API_KEY=your_api_key_here
+NEXT_PUBLIC_GROQ_API_KEY=your_api_key_here
 ```
-You can get a free VirusTotal API key from https://www.virustotal.com/gui/join-us
+You can get a free gorq API key from https://groq.com/
 
 🚀 Running the App
 Development Mode
@@ -85,5 +85,6 @@ Whether you are:
 👨‍👩‍👧‍👦 An everyday user wanting to stay safe online
 
 JU gives you the power to detect threats easily and protect yourself from scams.
+
 
 
