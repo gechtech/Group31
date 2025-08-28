@@ -5,12 +5,86 @@ import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+
+import { AlertTriangle, CheckCircle, Bot, Search, Puzzle } from "lucide-react";
+
 import { AlertTriangle, CheckCircle, Bot, Search } from "lucide-react";
+
 
 export function MaliciousURL() {
   const [url, setUrl] = useState("");
   const [loading, setLoading] = useState(false);
   const [analysis, setAnalysis] = useState<{ risk_score: number; reasoning: string; recommendations: string[] } | null>(null);
+
+
+  // --- NEW FUNCTION to add extension ---
+  const handleAddExtension = async () => {
+    try {
+      // ⚠️ IMPORTANT: Chrome does not allow adding extensions directly from web pages.
+      // This just *simulates* the process for your UI.
+      // In real use, you must manually enable Developer Mode in Chrome and load unpacked extensions.
+
+      alert(
+        "To add the extension:\n\n1. Open Chrome → Extensions (chrome://extensions/)\n2. Enable Developer Mode in the right top corner\n3. Click 'Load unpacked'\n4. Select folder:\nGroup31\\safe-browse-guard-extension"
+      );
+    } catch (err) {
+      alert("Failed to add extension: " + (err as Error).message);
+    }
+  };
+
+  // List of known phishing domains & suspicious keywords
+  const phishingDomains = [
+    "paypal-login.com",
+    "secure-update.net",
+    "apple-verify.com",
+    "bankofamerica-login.net",
+    "login-microsoftsecure.com",
+    "facebook-securityalert.com",
+    "google-verifyaccount.com",
+    "amazon-updatebilling.com",
+    "outlook-websecure.com",
+    "chase-banklogin.com",
+    "icloud-securityverify.com",
+    "dropbox-loginsecure.com",
+    "instagram-security-alert.com",
+    "linkedin-updateaccount.com",
+    "yahoo-mailverify.com",
+    "wellsfargo-securelogin.com",
+    "microsoft-supportverify.com",
+    "citibank-onlineverify.com",
+    "hsbc-securebanking.com",
+    "netflix-accountverify.com",
+    "steamcommunity-loginsecure.com",
+    "tiktok-verificationsecure.com",
+    "snapchat-loginverify.com",
+  ];
+
+  const suspiciousKeywords = [
+    "login",
+    "secure",
+    "verify",
+    "update",
+    "account",
+    "password",
+    "signin",
+    "webmail",
+    "auth",
+    "authentication",
+    "billing",
+    "confirm",
+    "credentials",
+    "idcheck",
+    "validate",
+    "banking",
+    "support",
+    "unlock",
+    "security",
+    "reset",
+    "verification",
+    "recover",
+    "access",
+    "renew",
+  ];
 
   // List of known phishing domains & suspicious keywords
 const phishingDomains = [
@@ -65,6 +139,7 @@ const suspiciousKeywords = [
   "access",
   "renew",
 ];
+
 
 
   // Local keyword-based detection
@@ -163,6 +238,21 @@ const suspiciousKeywords = [
 
   return (
     <div className="w-full">
+
+      {/* Header with Add Extension Button */}
+      <div className="flex justify-between items-center mb-6">
+        <div>
+          <h1 className="text-2xl font-bold flex items-center gap-2">
+            <Bot className="h-6 w-6 text-blue-600" /> Malicious URL Detection
+          </h1>
+          <p className="text-gray-600">
+            Paste a URL and check if it's potentially dangerous using keyword or AI analysis.
+          </p>
+        </div>
+        <Button onClick={handleAddExtension} variant="default" className="flex items-center gap-2">
+          <Puzzle className="h-4 w-4" /> Add Extension
+        </Button>
+=======
       <div className="mb-6">
         <h1 className="text-2xl font-bold flex items-center gap-2">
           <Bot className="h-6 w-6 text-blue-600" /> Malicious URL Detection
@@ -170,6 +260,7 @@ const suspiciousKeywords = [
         <p className="text-gray-600">
           Paste a URL and check if it's potentially dangerous using keyword or AI analysis.
         </p>
+
       </div>
 
       <Card>
