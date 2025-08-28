@@ -31,7 +31,7 @@ cd Group31
 
 
 2️⃣ Install Dependencies
-Using npm use -force if you fetch with error:
+Using npm use -force if you get an error:
 ```bash
 npm install
 ```
@@ -91,6 +91,7 @@ Whether you are:
 this tool gives you the power to detect threats easily and protect yourself from scams.
 
 This tool gives you the power to detect threats easily and protect yourself from scams.
+
 
 
 
