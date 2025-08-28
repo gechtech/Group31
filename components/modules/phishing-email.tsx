@@ -9,7 +9,6 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Mail, AlertTriangle, CheckCircle, Bot } from "lucide-react";
 
 
-
 export function PhishingEmail() {
   const [emailAccount, setEmailAccount] = useState("");
   const [emailContent, setEmailContent] = useState("");

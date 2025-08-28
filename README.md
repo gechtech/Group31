@@ -1,6 +1,9 @@
 # – Malicious URL & Phishing Detection Tool
 
 this tool is a **Next.js + TypeScript** application designed to detect **malicious and phishing URLs**.  
+
+This is a **Next.js + TypeScript** application designed to detect **malicious and phishing URLs**.  
+
 It uses **keyword-based scanning** and **AI-powered detection** (VirusTotal API) to help identify suspicious links before you click them.
 
 This tool is designed to be **useful for everyone** – from regular internet users to security researchers – making the web a safer place for all.
@@ -84,7 +87,11 @@ Whether you are:
 
 👨‍👩‍👧‍👦 An everyday user wanting to stay safe online
 
+
 this tool gives you the power to detect threats easily and protect yourself from scams.
+
+This tool gives you the power to detect threats easily and protect yourself from scams.
+
 
 
 
