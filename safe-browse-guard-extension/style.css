@@ -1,79 +1,154 @@
-/* Basic Styles */
 body {
-  font-family: 'Arial', sans-serif;
+  font-family: 'Inter', 'Poppins', 'Roboto', sans-serif;
+  background-color: #24292e; /* Deep charcoal gray */
+  color: #e0e0e0; /* Soft white */
   margin: 0;
-  padding: 15px;
-  background-color: #f4f7f6;
-  color: #333;
+  padding: 0;
 }
 
-h1, h2, h3 {
-  color: #2c3e50;
+#popup-container {
+  width: 280px; /* Compact width */
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  align-items: center;
+}
+
+h3 {
+  color: #e0e0e0;
+  margin-bottom: 10px;
+}
+
+.icon-placeholder {
+  width: 40px;
+  height: 40px;
+  background-color: #00bcd4; /* Vibrant teal */
+  border-radius: 8px;
+  margin-bottom: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  font-weight: bold;
+  color: #24292e;
 }
 
 button {
-  background-color: #3498db;
-  color: white;
+  width: 100%;
+  padding: 12px 15px;
   border: none;
-  padding: 8px 15px;
-  border-radius: 4px;
+  border-radius: 8px;
+  font-size: 1em;
+  font-weight: bold;
   cursor: pointer;
-  font-size: 14px;
-  transition: background-color 0.2s ease;
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 }
 
-button:hover {
-  background-color: #2980b9;
+#blockBtn {
+  background-color: #ff7043; /* Warm coral/orange */
+  color: white;
 }
 
-button#blockBtn { background-color: #e74c3c; }
-button#blockBtn:hover { background-color: #c0392b; }
+#blockBtn:hover {
+  background-color: #e65100;
+}
 
-button#allowBtn { background-color: #27ae60; }
-button#allowBtn:hover { background-color: #229954; }
+#allowBtn {
+  background-color: #00bcd4; /* Vibrant teal */
+  color: white;
+}
 
-/* Popup specific styles */
-#popup-container {
-  width: 300px;
+#allowBtn:hover {
+  background-color: #0097a7;
+}
+
+#manageBlockedSitesBtn {
+  background-color: transparent;
+  border: 2px solid #00bcd4; /* Vibrant teal border */
+  color: #00bcd4; /* Vibrant teal text */
+}
+
+#manageBlockedSitesBtn:hover {
+  background-color: rgba(0, 188, 212, 0.1); /* Slight teal background on hover */
+  border-color: #0097a7;
+  color: #0097a7;
 }
 
 #statusMessage {
+  color: #ff7043; /* Use coral for warning/error messages */
+  font-size: 0.9em;
   margin-top: 10px;
-  font-size: 13px;
+  text-align: center;
 }
 
-/* Options specific styles */
-.list-container {
+/* Options page specific styles */
+.options-container {
+  margin: 20px;
+  max-width: 600px;
+}
+
+.options-container h1 {
+  color: #e0e0e0;
+  margin-bottom: 15px;
+}
+
+.options-container p {
+  color: #b0b0b0;
   margin-bottom: 20px;
-  background-color: #ffffff;
-  padding: 15px;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-ul {
+#blocked-list {
   list-style: none;
   padding: 0;
 }
 
-li {
+#blocked-list li {
+  background-color: #363b40; /* Slightly lighter dark background for list items */
+  border: 1px solid #444a50;
+  padding: 10px 15px;
+  margin-bottom: 8px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 8px 0;
-  border-bottom: 1px solid #eee;
+  border-radius: 8px;
+  color: #e0e0e0;
 }
 
-li:last-child {
-  border-bottom: none;
+#blocked-list li span {
+  flex-grow: 1;
+  word-break: break-all;
+  margin-right: 10px;
 }
 
-li button {
-  padding: 5px 10px;
-  font-size: 12px;
-  background-color: #95a5a6;
+.unblock-btn {
+  background-color: #ff7043;
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 0.85em;
+  font-weight: bold;
 }
 
-li button:hover {
-  background-color: #7f8c8d;
+.unblock-btn:hover {
+  background-color: #e65100;
+}
+
+#message {
+  margin-top: 20px;
+  padding: 10px;
+  border-radius: 4px;
+  font-size: 0.9em;
+}
+
+.success {
+  background-color: #28a745;
+  color: white;
+}
+
+.error {
+  background-color: #dc3545;
+  color: white;
 }

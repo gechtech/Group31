@@ -45,7 +45,7 @@ export function PhishingEmail() {
 
     try {
       const apiKey = process.env.NEXT_PUBLIC_GROQ_API_KEY;
-      if (!apiKey) throw new Error("Missing Groq API key. Add NEXT_PUBLIC_GROQ_API_KEY in .env.1local");
+      if (!apiKey) throw new Error("Missing Groq API key. Add NEXT_PUBLIC_GROQ_API_KEY in .env.local");
 
       const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
         method: "POST",
@@ -206,6 +206,82 @@ Email Content: ${emailContent}`
               </div>
             </div>
           )}
+        </CardContent>
+      </Card>
+
+      {/* Educational Content */}
+      <Card className="mt-6">
+        <CardHeader>
+          <CardTitle>Understanding Phishing Email Attacks</CardTitle>
+          <CardDescription>
+            Learn about this common cyber threat and how to prevent it
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid gap-6 md:grid-cols-2">
+            <div>
+              <h4 className="font-semibold mb-3 text-red-700">What is Phishing Email?</h4>
+              <p className="text-sm text-gray-700">
+                Phishing is a type of social engineering attack often used to steal user data,
+                including login credentials and credit card numbers. It occurs when an attacker,
+                disguising themselves as a trustworthy entity, dupes a victim into opening an email,
+                instant message, or text message.
+              </p>
+
+              <h4 className="font-semibold mb-3 mt-6 text-red-700">Common Tactics:</h4>
+              <ul className="space-y-2 text-sm">
+                <li className="flex items-start gap-2">
+                  <span className="text-red-600 font-bold">•</span>
+                  <span>Urgent or threatening language (e.g., "account suspended," "immediate action required")</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-red-600 font-bold">•</span>
+                  <span>Links to fake login pages or malicious websites</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-red-600 font-bold">•</span>
+                  <span>Generic greetings ("Dear Customer") instead of your name</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-red-600 font-bold">•</span>
+                  <span>Attachments that contain malware</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-red-600 font-bold">•</span>
+                  <span>Spoofed sender addresses that look legitimate but are slightly off</span>
+                </li>
+              </ul>
+            </div>
+            <div>
+              <h4 className="font-semibold mb-3 text-green-700">Prevention Strategies:</h4>
+              <ul className="space-y-2 text-sm">
+                <li className="flex items-start gap-2">
+                  <span className="text-green-600 font-bold">•</span>
+                  <span>Always check the sender's email address for legitimacy</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-green-600 font-bold">•</span>
+                  <span>Hover over links before clicking to see the actual URL</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-green-600 font-bold">•</span>
+                  <span>Be suspicious of urgent or unexpected emails</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-green-600 font-bold">•</span>
+                  <span>Never provide personal information or credentials in response to an email</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-green-600 font-bold">•</span>
+                  <span>Use multi-factor authentication (MFA)</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-green-600 font-bold">•</span>
+                  <span>Report suspicious emails to your IT department</span>
+                </li>
+              </ul>
+            </div>
+          </div>
         </CardContent>
       </Card>
     </div>

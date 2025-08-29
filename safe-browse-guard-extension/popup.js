@@ -17,6 +17,7 @@ function displayStatus(message, isError = false) {
   }, 3000);
 }
 
+// 🔴 Block button (original functionality preserved)
 document.getElementById("blockBtn").addEventListener("click", () => {
   chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
     const hostname = getHostname(tabs[0].url);
@@ -43,6 +44,7 @@ document.getElementById("blockBtn").addEventListener("click", () => {
   });
 });
 
+// 🟢 Allow button (new functionality)
 document.getElementById("allowBtn").addEventListener("click", () => {
   chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
     const hostname = getHostname(tabs[0].url);
@@ -51,20 +53,23 @@ document.getElementById("allowBtn").addEventListener("click", () => {
       return;
     }
 
-    chrome.storage.local.get(["allowList"], (data) => {
-      let allowList = data.allowList || [];
-      if (!allowList.includes(hostname)) {
-        allowList.push(hostname);
-        chrome.storage.local.set({ allowList }, () => {
-          if (chrome.runtime.lastError) {
-            displayStatus(`Error allowing site: ${chrome.runtime.lastError.message}`, true);
-          } else {
-            displayStatus(`'${hostname}' allowed successfully!`);
-          }
-        });
+    chrome.storage.local.get(["blockList"], (data) => {
+      let blockList = data.blockList || [];
+      if (blockList.includes(hostname)) {
+        // Already blocked → tell user to use Manage Blocked Sites
+        displayStatus(
+          `⚠ '${hostname}' is blocked. You can allow it in Manage Blocked Sites.`,
+          true
+        );
       } else {
-        displayStatus(`'${hostname}' is already allowed.`);
+        // Not blocked
+        displayStatus(`'${hostname}' is not blocked.`);
       }
     });
   });
+});
+
+// ⚙ Manage Blocked Sites button
+document.getElementById("manageBlockedSitesBtn").addEventListener("click", () => {
+  chrome.runtime.openOptionsPage();
 });

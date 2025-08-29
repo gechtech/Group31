@@ -32,6 +32,7 @@ export function MaliciousURL() {
     "paypal-login.com",
     "secure-update.net",
     "apple-verify.com",
+    "ply.gg",
     "bankofamerica-login.net",
     "login-microsoftsecure.com",
     "facebook-securityalert.com",
@@ -64,6 +65,7 @@ export function MaliciousURL() {
     "signin",
     "webmail",
     "auth",
+    "ply.gg",
     "authentication",
     "billing",
     "confirm",
@@ -257,6 +259,78 @@ export function MaliciousURL() {
           )}
         </CardContent>
       </Card>
+
+      {/* Educational Content */}
+      <Card className="mt-6">
+        <CardHeader>
+          <CardTitle>Understanding Malicious URL Attacks</CardTitle>
+          <CardDescription>
+            Learn about dangerous links and how to identify them
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid gap-6 md:grid-cols-2">
+            <div>
+              <h4 className="font-semibold mb-3 text-red-700">What is a Malicious URL?</h4>
+              <p className="text-sm text-gray-700">
+                A malicious URL (Uniform Resource Locator) is a link designed to lead users to
+                websites that host malware, phishing scams, or other harmful content.
+                These URLs are often disguised to look legitimate, tricking users into clicking them.
+              </p>
+
+              <h4 className="font-semibold mb-3 mt-6 text-red-700">Common Tactics:</h4>
+              <ul className="space-y-2 text-sm">
+                <li className="flex items-start gap-2">
+                  <span className="text-red-600 font-bold">•</span>
+                  <span>Typo-squatting (e.g., "gooogle.com" instead of "google.com")</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-red-600 font-bold">•</span>
+                  <span>Using legitimate domain names with extra subdomains (e.g., "bank.com.malicious.link")</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-red-600 font-bold">•</span>
+                  <span>URL shortening services (making the destination hidden)</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-red-600 font-bold">•</span>
+                  <span>Embedding credentials in the URL (e.g., "http://user:pass@example.com")</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-red-600 font-bold">•</span>
+                  <span>Redirects to unexpected or malicious sites</span>
+                </li>
+              </ul>
+            </div>
+            <div>
+              <h4 className="font-semibold mb-3 text-green-700">Prevention Strategies:</h4>
+              <ul className="space-y-2 text-sm">
+                <li className="flex items-start gap-2">
+                  <span className="text-green-600 font-bold">•</span>
+                  <span>Hover over links to inspect the full URL before clicking</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-green-600 font-bold">•</span>
+                  <span>Be wary of unexpected links in emails, messages, or social media</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-green-600 font-bold">•</span>
+                  <span>Use a URL scanner or browser extension to check link safety</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-green-600 font-bold">•</span>
+                  <span>Ensure your browser and antivirus software are up-to-date</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-green-600 font-bold">•</span>
+                  <span>Only download files from trusted sources</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }
+
