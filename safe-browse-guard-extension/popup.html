@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>SafeBrowse Guard</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: "Segoe UI", Arial, sans-serif;
+      background: #f5f7fa;
+      color: #333;
+      width: 280px;
+    }
+    .popup-container { padding: 15px; }
+    header {
+      display: flex;
+      align-items: center;
+      border-bottom: 1px solid #ddd;
+      padding-bottom: 8px;
+      margin-bottom: 12px;
+    }
+    header .logo { width: 28px; height: 28px; margin-right: 10px; }
+    h2 { font-size: 16px; margin: 0; color: #1e3a8a; }
+    .current-site { margin-bottom: 12px; }
+    #statusMessage {
+      margin-top: 8px;
+      font-size: 13px;
+      font-weight: bold;
+      color: #444;
+    }
+    .actions { display: flex; justify-content: space-between; margin-bottom: 12px; }
+    .btn {
+      flex: 1;
+      padding: 8px;
+      margin: 3px;
+      font-size: 14px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: transform 0.1s ease, background 0.2s;
+    }
+    .btn.allow { background: #10b981; color: white; }
+    .btn.allow:hover { background: #059669; transform: scale(1.05); }
+    .btn.block { background: #ef4444; color: white; }
+    .btn.block:hover { background: #b91c1c; transform: scale(1.05); }
+    .btn.secondary { background: #3b82f6; color: white; width: 100%; }
+    .btn.secondary:hover { background: #2563eb; }
+    footer { text-align: center; font-size: 11px; color: #666; margin-top: 10px; }
+  </style>
+</head>
+<body>
+  <div class="popup-container">
+    <header>
+      <img src="icons/icon48.png" alt="SafeBrowse Logo" class="logo" />
+      <h2>SafeBrowse Guard</h2>
+    </header>
+
+    <section class="current-site">
+      <p><strong>Current Site:</strong> <span id="currentSite">Loading...</span></p>
+      <div id="statusMessage"></div>
+    </section>
+
+    <section class="actions">
+      <button id="allowBtn" class="btn allow">✅ Allow</button>
+      <button id="blockBtn" class="btn block">🚫 Block</button>
+    </section>
+
+    <section class="management">
+      <button id="manageBlockedSitesBtn" class="btn secondary">
+        ⚙ Manage Blocked Sites
+      </button>
+    </section>
+
+    <footer>
+      <small>Powered by SafeBrowse Guard © 2025</small>
+    </footer>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

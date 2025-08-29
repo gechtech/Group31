@@ -1,0 +1,154 @@
+body {
+  font-family: 'Inter', 'Poppins', 'Roboto', sans-serif;
+  background-color: #24292e; /* Deep charcoal gray */
+  color: #e0e0e0; /* Soft white */
+  margin: 0;
+  padding: 0;
+}
+
+#popup-container {
+  width: 280px; /* Compact width */
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  align-items: center;
+}
+
+h3 {
+  color: #e0e0e0;
+  margin-bottom: 10px;
+}
+
+.icon-placeholder {
+  width: 40px;
+  height: 40px;
+  background-color: #00bcd4; /* Vibrant teal */
+  border-radius: 8px;
+  margin-bottom: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  font-weight: bold;
+  color: #24292e;
+}
+
+button {
+  width: 100%;
+  padding: 12px 15px;
+  border: none;
+  border-radius: 8px;
+  font-size: 1em;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+
+#blockBtn {
+  background-color: #ff7043; /* Warm coral/orange */
+  color: white;
+}
+
+#blockBtn:hover {
+  background-color: #e65100;
+}
+
+#allowBtn {
+  background-color: #00bcd4; /* Vibrant teal */
+  color: white;
+}
+
+#allowBtn:hover {
+  background-color: #0097a7;
+}
+
+#manageBlockedSitesBtn {
+  background-color: transparent;
+  border: 2px solid #00bcd4; /* Vibrant teal border */
+  color: #00bcd4; /* Vibrant teal text */
+}
+
+#manageBlockedSitesBtn:hover {
+  background-color: rgba(0, 188, 212, 0.1); /* Slight teal background on hover */
+  border-color: #0097a7;
+  color: #0097a7;
+}
+
+#statusMessage {
+  color: #ff7043; /* Use coral for warning/error messages */
+  font-size: 0.9em;
+  margin-top: 10px;
+  text-align: center;
+}
+
+/* Options page specific styles */
+.options-container {
+  margin: 20px;
+  max-width: 600px;
+}
+
+.options-container h1 {
+  color: #e0e0e0;
+  margin-bottom: 15px;
+}
+
+.options-container p {
+  color: #b0b0b0;
+  margin-bottom: 20px;
+}
+
+#blocked-list {
+  list-style: none;
+  padding: 0;
+}
+
+#blocked-list li {
+  background-color: #363b40; /* Slightly lighter dark background for list items */
+  border: 1px solid #444a50;
+  padding: 10px 15px;
+  margin-bottom: 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-radius: 8px;
+  color: #e0e0e0;
+}
+
+#blocked-list li span {
+  flex-grow: 1;
+  word-break: break-all;
+  margin-right: 10px;
+}
+
+.unblock-btn {
+  background-color: #ff7043;
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 0.85em;
+  font-weight: bold;
+}
+
+.unblock-btn:hover {
+  background-color: #e65100;
+}
+
+#message {
+  margin-top: 20px;
+  padding: 10px;
+  border-radius: 4px;
+  font-size: 0.9em;
+}
+
+.success {
+  background-color: #28a745;
+  color: white;
+}
+
+.error {
+  background-color: #dc3545;
+  color: white;
+}
