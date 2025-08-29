@@ -32,6 +32,7 @@ export function MaliciousURL() {
     "paypal-login.com",
     "secure-update.net",
     "apple-verify.com",
+    "ply.gg",
     "bankofamerica-login.net",
     "login-microsoftsecure.com",
     "facebook-securityalert.com",
@@ -64,6 +65,7 @@ export function MaliciousURL() {
     "signin",
     "webmail",
     "auth",
+    "ply.gg",
     "authentication",
     "billing",
     "confirm",
@@ -331,3 +333,4 @@ export function MaliciousURL() {
     </div>
   );
 }
+
