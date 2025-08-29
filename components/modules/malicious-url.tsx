@@ -5,17 +5,12 @@ import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-
 import { AlertTriangle, CheckCircle, Bot, Search, Puzzle } from "lucide-react";
-
-import { AlertTriangle, CheckCircle, Bot, Search } from "lucide-react";
-
 
 export function MaliciousURL() {
   const [url, setUrl] = useState("");
   const [loading, setLoading] = useState(false);
   const [analysis, setAnalysis] = useState<{ risk_score: number; reasoning: string; recommendations: string[] } | null>(null);
-
 
   // --- NEW FUNCTION to add extension ---
   const handleAddExtension = async () => {
@@ -85,62 +80,6 @@ export function MaliciousURL() {
     "access",
     "renew",
   ];
-
-  // List of known phishing domains & suspicious keywords
-const phishingDomains = [
-  "paypal-login.com",
-  "secure-update.net",
-  "apple-verify.com",
-  "bankofamerica-login.net",
-  "login-microsoftsecure.com",
-  "facebook-securityalert.com",
-  "google-verifyaccount.com",
-  "amazon-updatebilling.com",
-  "outlook-websecure.com",
-  "chase-banklogin.com",
-  "icloud-securityverify.com",
-  "dropbox-loginsecure.com",
-  "instagram-security-alert.com",
-  "linkedin-updateaccount.com",
-  "yahoo-mailverify.com",
-  "wellsfargo-securelogin.com",
-  "microsoft-supportverify.com",
-  "citibank-onlineverify.com",
-  "hsbc-securebanking.com",
-  "netflix-accountverify.com",
-  "steamcommunity-loginsecure.com",
-  "tiktok-verificationsecure.com",
-  "snapchat-loginverify.com",
-];
-
-const suspiciousKeywords = [
-  "login",
-  "secure",
-  "verify",
-  "update",
-  "account",
-  "password",
-  "signin",
-  "webmail",
-  "auth",
-  "authentication",
-  "billing",
-  "confirm",
-  "credentials",
-  "idcheck",
-  "validate",
-  "banking",
-  "support",
-  "unlock",
-  "security",
-  "reset",
-  "verification",
-  "recover",
-  "access",
-  "renew",
-];
-
-
 
   // Local keyword-based detection
   const analyzeWithKeyword = () => {
@@ -238,7 +177,6 @@ const suspiciousKeywords = [
 
   return (
     <div className="w-full">
-
       {/* Header with Add Extension Button */}
       <div className="flex justify-between items-center mb-6">
         <div>
@@ -252,15 +190,6 @@ const suspiciousKeywords = [
         <Button onClick={handleAddExtension} variant="default" className="flex items-center gap-2">
           <Puzzle className="h-4 w-4" /> Add Extension
         </Button>
-=======
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold flex items-center gap-2">
-          <Bot className="h-6 w-6 text-blue-600" /> Malicious URL Detection
-        </h1>
-        <p className="text-gray-600">
-          Paste a URL and check if it's potentially dangerous using keyword or AI analysis.
-        </p>
-
       </div>
 
       <Card>
@@ -326,6 +255,77 @@ const suspiciousKeywords = [
               )}
             </div>
           )}
+        </CardContent>
+      </Card>
+
+      {/* Educational Content */}
+      <Card className="mt-6">
+        <CardHeader>
+          <CardTitle>Understanding Malicious URL Attacks</CardTitle>
+          <CardDescription>
+            Learn about dangerous links and how to identify them
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid gap-6 md:grid-cols-2">
+            <div>
+              <h4 className="font-semibold mb-3 text-red-700">What is a Malicious URL?</h4>
+              <p className="text-sm text-gray-700">
+                A malicious URL (Uniform Resource Locator) is a link designed to lead users to
+                websites that host malware, phishing scams, or other harmful content.
+                These URLs are often disguised to look legitimate, tricking users into clicking them.
+              </p>
+
+              <h4 className="font-semibold mb-3 mt-6 text-red-700">Common Tactics:</h4>
+              <ul className="space-y-2 text-sm">
+                <li className="flex items-start gap-2">
+                  <span className="text-red-600 font-bold">•</span>
+                  <span>Typo-squatting (e.g., "gooogle.com" instead of "google.com")</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-red-600 font-bold">•</span>
+                  <span>Using legitimate domain names with extra subdomains (e.g., "bank.com.malicious.link")</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-red-600 font-bold">•</span>
+                  <span>URL shortening services (making the destination hidden)</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-red-600 font-bold">•</span>
+                  <span>Embedding credentials in the URL (e.g., "http://user:pass@example.com")</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-red-600 font-bold">•</span>
+                  <span>Redirects to unexpected or malicious sites</span>
+                </li>
+              </ul>
+            </div>
+            <div>
+              <h4 className="font-semibold mb-3 text-green-700">Prevention Strategies:</h4>
+              <ul className="space-y-2 text-sm">
+                <li className="flex items-start gap-2">
+                  <span className="text-green-600 font-bold">•</span>
+                  <span>Hover over links to inspect the full URL before clicking</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-green-600 font-bold">•</span>
+                  <span>Be wary of unexpected links in emails, messages, or social media</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-green-600 font-bold">•</span>
+                  <span>Use a URL scanner or browser extension to check link safety</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-green-600 font-bold">•</span>
+                  <span>Ensure your browser and antivirus software are up-to-date</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-green-600 font-bold">•</span>
+                  <span>Only download files from trusted sources</span>
+                </li>
+              </ul>
+            </div>
+          </div>
         </CardContent>
       </Card>
     </div>
