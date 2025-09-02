@@ -64,6 +64,18 @@ This will start the  web app on:
 http://localhost:3000
 
 
+Safe Browse Guard Extension
+
+The Safe Browse Guard Extension helps protect users from online threats by blocking access to 30+ known malicious and phishing websites.
+
+🔒 Key Features
+
+Automatically detects and blocks dangerous sites.
+
+Prevents access to phishing and malware-hosting domains.
+
+Lightweight, fast, and easy to use.
+
 
 🛠 How to Use
 Open the app in your browser.
@@ -91,6 +103,7 @@ Whether you are:
 this tool gives you the power to detect threats easily and protect yourself from scams.
 
 This tool gives you the power to detect threats easily and protect yourself from scams.
+
 
 
 
