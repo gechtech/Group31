@@ -1,5 +1,4 @@
-# – Malicious URL & Phishing Detection Tool
-
+# social engineering atacks detector analaysis Tool
 this tool is a **Next.js + TypeScript** application designed to detect **malicious and phishing URLs**.  
 
 This is a **Next.js + TypeScript** application designed to detect **malicious and phishing URLs**.  
@@ -103,6 +102,7 @@ Whether you are:
 this tool gives you the power to detect threats easily and protect yourself from scams.
 
 This tool gives you the power to detect threats easily and protect yourself from scams.
+
 
 
 
