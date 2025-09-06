@@ -1,4 +1,4 @@
-# – Malicious URL & Phishing Detection Tool
+# – Malicious URL & Phishing Detection Tool with python backend
 
 this tool is a **Next.js + TypeScript** application designed to detect **malicious and phishing URLs**.  
 
@@ -33,18 +33,11 @@ cd Group31
 2️⃣ Install Dependencies
 Using npm:
 ```bash
-npm install
+pip install -r requirements.txt
 ```
-Or with pnpm:
-```bash
-pnpm install
-```
-Or with yarn:
-```bash
-yarn install
-```
+
 3️⃣ Set Up Environment Variables
-Create a .env.local file in the root directory and add:
+Create a .env file in the root directory and add:
 ```bash
 NEXT_PUBLIC_GROQ_API_KEY=your_api_key_here
 ```
@@ -53,20 +46,19 @@ You can get a free gorq API key from https://groq.com/
 🚀 Running the App
 Development Mode
 ```bash
-npm run dev
+python3 app.py
 ```
-or
-```bash
-pnpm dev
-```
+
 This will start the  web app on:
 
-http://localhost:3000
+http://127.0.0.1:4444
 
 
 
 🛠 How to Use
 Open the app in your browser.
+
+this is the updated python backend based server 
 
 Paste the URL you want to check.
 
@@ -91,6 +83,7 @@ Whether you are:
 this tool gives you the power to detect threats easily and protect yourself from scams.
 
 This tool gives you the power to detect threats easily and protect yourself from scams.
+
 
 
 
