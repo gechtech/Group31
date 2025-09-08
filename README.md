@@ -51,7 +51,7 @@ python3 app.py
 
 This will start the  web app on:
 
-http://127.0.0.1:4444
+http://127.0.0.1:2000
 
 
 
@@ -59,6 +59,8 @@ http://127.0.0.1:4444
 Open the app in your browser.
 
 this is the updated python backend based server 
+
+and which has a many feature like a firewall ratlimit and so on
 
 Paste the URL you want to check.
 
@@ -83,6 +85,7 @@ Whether you are:
 this tool gives you the power to detect threats easily and protect yourself from scams.
 
 This tool gives you the power to detect threats easily and protect yourself from scams.
+
 
 
 
