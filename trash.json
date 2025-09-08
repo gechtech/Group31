@@ -1,0 +1,10 @@
+[
+  {
+    "id": 1,
+    "username": "amir",
+    "email": "amirhassen354@gmail.com",
+    "profile_image": null,
+    "deleted_at": "2025-09-08T18:55:11.021186",
+    "deleted_reason": "user_requested_logout"
+  }
+]

@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>{{ 'Sign Up' if mode == 'signup' else 'Login' }} - Secure Access</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('login_assets_css') }}">
+    <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+    <script src="{{ url_for('login_assets_js') }}" defer></script>
+</head>
+<body>
+    <div class="container{% if mode == 'signup' %} active{% endif %}">
+        <div class="curved-shape"></div>
+        <div class="curved-shape2"></div>
+
+        {% if error %}
+        <div class="legi-link" style="text-align:center; color:#ff9898; font-weight:600;">{{ error }}</div>
+        {% endif %}
+
+        <div class="form-box Login">
+            <h2 class="animation" style="--D:0; --S:21">Login</h2>
+            <form method="POST" action="{{ url_for('login_page') }}">
+                <div class="input-box animation" style="--D:1; --S:22">
+                    <input type="text" name="username" required>
+                    <label for="">Username</label>
+                    <i class='bx bxs-user'></i>
+                </div>
+                <div class="input-box animation" style="--D:2; --S:23">
+                    <input type="password" name="password" required>
+                    <label for="">password</label>
+                    <i class='bx bxs-lock-alt'></i>
+                </div>
+                <div class="input-box animation" style="--D:3; --S:24">
+                    <button class="btn" type="submit">Login</button>
+                </div>
+                <div class="legi-link animation" style="--D:4; --S:25">
+                    <p>Don't have an account? <a href="#" class="SignUpLink">Sign Up</a></p>
+                </div>
+            </form>
+        </div>
+        <div class="info-content Login">
+            <h2 class="animation" style="--D:0; --S:20">Welcome Back!</h2>
+            <p class="animation" style="--D:1; --S:21">To keep connected with us please login with your personal info</p>
+        </div>
+        <div class="form-box Register">
+            <h2 class="animation" style="--1i:17; --S:0;">Register</h2>
+            <form method="POST" action="{{ url_for('signup_page') }}">
+                <div class="input-box animation" style="--1i:18; --S:1;">
+                    <input type="text" name="username" required>
+                    <label for=" ">Username</label>
+                    <i class='bx bxs-user'></i>
+                </div>
+                <div class="input-box animation" style="--1i:19; --S:2;">
+                    <input type="email" name="email" required>
+                    <label for="">email</label>
+                    <i class='bx bxs-envelope'></i>
+                </div>
+                <div class="input-box animation" style="--1i:20; --S:3;">
+                    <input type="password" name="password" required>
+                    <label for="">password</label>
+                    <i class='bx bxs-lock-alt'></i>
+                </div>
+                <div class="input-box animation" style="--1i:21; --S:4;">
+                    <button class="btn" type="submit">Register</button>
+                </div>
+                <div class="legi-link animation" style="--1i:22; --S:5;">
+                    <p>Already have an account? <a href="#" class="SignInLink">Sign In</a></p>
+                </div>
+            </form>
+        </div>
+        <div class="info-content Register">
+            <h2 class="animation" style="--1i:17; --S:0;">Welcome!</h2>
+            <p class="animation" style="--1i:18; --S:1;">To keep connected with us please login with your personal info</p>
+        </div>
+    </div>
+</body>
+</html>
+

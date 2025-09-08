@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Malicious URL Detection</title>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    .status { padding: 12px; border-radius: 8px; border: 1px solid; }
+    .status.ok { border-color: #16a34a; background: #ecfdf5; color: #065f46; }
+    .status.warn { border-color: #f59e0b; background: #fffbeb; color: #78350f; }
+    .status.err { border-color: #ef4444; background: #fee2e2; color: #991b1b; }
+    .topbar { display:flex; justify-content: space-between; align-items:center; margin-bottom: 16px; }
+    .btn { appearance: none; border: 1px solid #d1d5db; background: #111827; color: white; padding: 10px 14px; border-radius: 8px; cursor: pointer; font-weight: 600; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="topbar">
+      <button id="btn-add-ext" class="btn btn-secondary">Add Extension</button>
+    </div>
+    <div class="page-header">
+      <div class="header-row">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-link h-6 w-6 text-gray-600"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+        <h1>Malicious URL Detection</h1>
+      </div>
+      <p class="page-subtitle">Paste a URL and check if it's potentially dangerous using keyword or AI analysis.</p>
+    </div>
+
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">URL Analysis Tool</div>
+        <div class="card-desc">Scan URLs for malicious or phishing behavior</div>
+      </div>
+      <div class="card-content">
+        <div class="mb-3">
+          <label for="url-input">URL</label>
+          <input id="url-input" type="url" placeholder="https://example.com" />
+        </div>
+        <div class="row">
+          <button id="btn-keyword" class="btn btn-outline col">Keyword Analysis</button>
+          <button id="btn-ai" class="btn btn-secondary col">AI Analysis</button>
+        </div>
+
+        <div id="result" class="mt-3"></div>
+      </div>
+    </div>
+
+    <div class="card mt-4">
+      <div class="card-header">
+        <div class="card-title">Understanding Malicious URL Attacks</div>
+        <div class="card-desc">Learn about dangerous links and how to identify them</div>
+      </div>
+      <div class="card-content">
+        <div class="grid two">
+          <div>
+            <h4 style="color:#b91c1c">What is a Malicious URL?</h4>
+            <p class="card-desc">A malicious URL is a link designed to lead users to websites that host malware, phishing scams, or other harmful content. These URLs are often disguised to look legitimate.</p>
+            <h4 class="mt-3" style="color:#b91c1c">Common Tactics:</h4>
+            <ul class="list-dots">
+              <li>Typo-squatting (e.g., gooogle.com)</li>
+              <li>Extra subdomains (bank.com.malicious.link)</li>
+              <li>URL shorteners hide destination</li>
+              <li>Credentials in URL (http://user:pass@example.com)</li>
+              <li>Unexpected redirects</li>
+            </ul>
+          </div>
+          <div>
+            <h4 style="color:#166534">Prevention Strategies:</h4>
+            <ul class="list-dots">
+              <li>Hover to preview full URL</li>
+              <li>Beware of unexpected links</li>
+              <li>Use a URL scanner/extension</li>
+              <li>Keep browser/AV updated</li>
+              <li>Only download from trusted sources</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

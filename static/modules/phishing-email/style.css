@@ -1,0 +1,6 @@
+.minh { min-height: 8rem; }
+.panel { padding: 12px; border-radius: 8px; border: 1px solid #e5e7eb; }
+.panel.ok { background: #ecfdf5; color:#065f46; border-color:#10b981; }
+.panel.warn { background: #fffbeb; color:#78350f; border-color:#f59e0b; }
+.panel.err { background: #fee2e2; color:#991b1b; border-color:#ef4444; }
+

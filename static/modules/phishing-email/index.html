@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Phishing Email Detection</title>
+  <link rel="stylesheet" href="../shared/style.css" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="container">
+
+    
+    <div class="header">
+      <div class="header-row">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-mail h-6 w-6 text-blue-600"><rect width="20" height="16" x="2" y="4" rx="2"></rect><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"></path></svg>
+        <h1>Phishing Email Detection anim</h1>
+      </div>
+      <p class="card-desc">Paste an email address and its content to analyze it with AI and keyword detection.</p>
+    </div>
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">Email Analysis Tool</div>
+        <div class="card-desc">Scans for phishing keywords and AI analysis</div>
+      </div>
+      <div class="card-content">
+        <div class="mb-3">
+          <label for="email-account">Email Account</label>
+          <input id="email-account" type="email" placeholder="e.g. user@example.com" />
+        </div>
+        <div class="mb-3">
+          <label for="email-content">Email Content</label>
+          <textarea id="email-content" class="minh" placeholder="Paste the email content here..."></textarea>
+        </div>
+        <div class="row">
+          <button id="btn-local" class="btn btn-outline col">Keyword Analysis</button>
+          <button id="btn-ai" class="btn btn-secondary col">AI Analysis</button>
+        </div>
+
+        <div id="local-result" class="mt-3"></div>
+        <div id="ai-result" class="mt-3"></div>
+      </div>
+    </div>
+
+    <div class="card mt-4">
+      <div class="card-header">
+        <div class="card-title">Understanding Phishing Email Attacks</div>
+        <div class="card-desc">Learn about this common cyber threat and how to prevent it</div>
+      </div>
+      <div class="card-content">
+        <div class="grid two">
+          <div>
+            <h4 style="color:#b91c1c">What is Phishing Email?</h4>
+            <p class="card-desc">Phishing is a social engineering attack often used to steal user data. Attackers disguise as a trustworthy entity to dupe victims into opening emails, messages, or links.</p>
+            <h4 class="mt-3" style="color:#b91c1c">Common Tactics:</h4>
+            <ul class="list-dots">
+              <li>Urgent/threatening language</li>
+              <li>Links to fake login pages</li>
+              <li>Generic greetings</li>
+              <li>Malicious attachments</li>
+              <li>Spoofed sender addresses</li>
+            </ul>
+          </div>
+          <div>
+            <h4 style="color:#166534">Prevention Strategies:</h4>
+            <ul class="list-dots">
+              <li>Verify sender address</li>
+              <li>Hover on links before clicking</li>
+              <li>Be suspicious of urgency</li>
+              <li>Never provide credentials by email</li>
+              <li>Use multi-factor authentication</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
+
+
