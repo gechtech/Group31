@@ -39,7 +39,7 @@ pip install -r requirements.txt
 3️⃣ Set Up Environment Variables
 Create a .env file in the root directory and add:
 ```bash
-NEXT_PUBLIC_GROQ_API_KEY=your_api_key_here
+GROQ_API_KEY=your_api_key_here
 ```
 You can get a free gorq API key from https://groq.com/
 
@@ -85,6 +85,7 @@ Whether you are:
 this tool gives you the power to detect threats easily and protect yourself from scams.
 
 This tool gives you the power to detect threats easily and protect yourself from scams.
+
 
 
 
