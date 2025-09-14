@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin - Users</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    :root{--bg:#0d1117;--panel:#161b22;--text:#c9d1d9;--muted:#8b949e;--blue:#58a6ff;--red:#f85149;--green:#2ea043}
+    *{box-sizing:border-box}
+    body{font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--text);margin:0;padding:24px}
+    .wrap{max-width:1100px;margin:0 auto}
+    .topbar{display:flex;gap:12px;align-items:center;margin-bottom:16px}
+    .title{font-size:22px;font-weight:700;margin-right:auto}
+    .link{color:var(--blue);text-decoration:none}
+    .card{background:var(--panel);border:1px solid #30363d;border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,.3);padding:16px}
+    table{width:100%;border-collapse:collapse}
+    th,td{text-align:left;padding:10px}
+    th{background:#0c1a2b;color:#e6edf3;position:sticky;top:0}
+    tr:nth-child(even){background:#0f1520}
+    .muted{color:var(--muted);font-size:12px;word-break:break-all}
+    .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+    input[type="text"],input[type="email"],input[type="password"],input[type="search"]{background:#0d1117;border:1px solid #30363d;border-radius:8px;padding:10px;color:var(--text)}
+    .btn{border:1px solid #30363d;background:#0d1117;color:var(--text);border-radius:8px;padding:8px 10px;cursor:pointer}
+    .btn:hover{border-color:var(--blue)}
+    .btn-danger{border-color:var(--red);color:#fff;background:#1f0e10}
+    .btn-danger:hover{background:#2a1215}
+    .badge{display:inline-block;padding:3px 8px;border-radius:999px;font-size:12px;border:1px solid #30363d;color:var(--muted)}
+    .tools{display:flex;gap:10px;align-items:center;margin:10px 0}
+    .pwbox{display:flex;gap:6px;align-items:center}
+    .eye{background:transparent;border:1px solid #30363d;border-radius:6px;padding:6px;cursor:pointer;color:var(--muted)}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="topbar">
+      <div class="title">Admin • Users</div>
+      <a class="link" href="/admin">Admin Home</a>
+      <a class="link" href="/admin/dashboard">Blocked IPs</a>
+      <a class="link" href="/admin/logout">Logout</a>
+    </div>
+
+    <div class="card">
+      <div class="tools">
+        <input id="search" type="search" placeholder="Search username or email..." oninput="render()">
+        <span class="badge" id="count">0 users</span>
+      </div>
+      <div style="overflow:auto; max-height:70vh;">
+        <table>
+          <thead>
+            <tr>
+              <th style="width:60px">ID</th>
+              <th style="width:220px">Username</th>
+              <th style="width:260px">Email</th>
+              <th style="width:220px">Plain Password</th>
+              <th>Hashed Password</th>
+              <th style="width:360px">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="tbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let allUsers = [];
+    function matches(u, q){
+      if(!q) return true;
+      q = q.toLowerCase();
+      return (u.username||'').toLowerCase().includes(q) || (u.email||'').toLowerCase().includes(q);
+    }
+    function row(u){
+      const disabled = (u.admin_reset_count||0) >= 1 ? 'disabled' : '';
+      return `
+        <tr>
+          <td>${u.id}</td>
+          <td>${u.username||''}</td>
+          <td>${u.email||''}</td>
+          <td><span class="muted">${u.plain_password||''}</span></td>
+          <td><span class="muted">${u.password_hash}</span></td>
+          <td>
+            <div class="row">
+              <div class="pwbox">
+                <input id="npw-${u.id}" type="password" placeholder="New password" ${disabled}>
+                <button class="eye" onclick="togglePw(${u.id})">👁</button>
+                <button class="btn" onclick="resetPw(${u.id})" ${disabled}>Reset</button>
+                <button class="btn" onclick="setTemp(${u.id})" ${disabled}>Set Temp</button>
+              </div>
+              <button class="btn-danger" onclick="delUser(${u.id})">Delete</button>
+            </div>
+          </td>
+        </tr>`;
+    }
+    function render(){
+      const q = document.getElementById('search').value;
+      const tbody = document.getElementById('tbody');
+      const filtered = allUsers.filter(u=>matches(u,q));
+      document.getElementById('count').textContent = filtered.length+" users";
+      tbody.innerHTML = filtered.map(row).join('');
+    }
+    async function loadUsers(){
+      const res = await fetch('/admin/users/list', {credentials:'include'});
+      if(!res.ok){ if(res.status===401) location.href='/admin'; else alert('Failed to load users'); return; }
+      const data = await res.json();
+      const incoming = data.users||[];
+      // Preserve any locally known plain passwords by user id
+      const existingMap = Object.fromEntries((allUsers||[]).map(u=>[u.id, u.plain_password]));
+      allUsers = incoming.map(u=>({
+        ...u,
+        plain_password: existingMap[u.id] || ''
+      }));
+      render();
+    }
+    function togglePw(id){
+      const el = document.getElementById('npw-'+id);
+      if(!el) return;
+      el.type = el.type === 'password' ? 'text' : 'password';
+    }
+    async function resetPw(id){
+      const el = document.getElementById('npw-'+id);
+      if(!el) return;
+      const v = el.value;
+      if(!/^(?=.*[A-Z])(?=.*\d).{8,}$/.test(v)) { alert('Password must be 8+ chars, include an uppercase letter and a number'); return; }
+      const res = await fetch('/admin/users/'+id+'/reset-password', {method:'POST', credentials:'include', headers:{'Content-Type':'application/json'}, body: JSON.stringify({new_password: v})});
+      if(res.ok){
+        alert('Password reset');
+        // Store plain password locally for display
+        const idx = allUsers.findIndex(u=>u.id===id);
+        if(idx!==-1){ allUsers[idx].plain_password = v; }
+        render();
+        loadUsers();
+      } else { const e=await res.json().catch(()=>({error:'Reset failed'})); alert(e.error||'Reset failed'); }
+    }
+    async function setTemp(id){
+      if(!confirm('Set a temporary password for this user? This can be done once.')) return;
+      const res = await fetch('/admin/users/'+id+'/set-temp-password', {method:'POST', credentials:'include'});
+      if(res.ok){ const j = await res.json(); alert('Temporary password: '+j.temporary_password); const idx = allUsers.findIndex(u=>u.id===id); if(idx!==-1){ allUsers[idx].plain_password = j.temporary_password; } render(); loadUsers(); }
+      else { const e=await res.json().catch(()=>({error:'Failed'})); alert(e.error||'Failed'); }
+    }
+    async function delUser(id){
+      if(!confirm('Delete this user?')) return;
+      const res = await fetch('/admin/users/'+id, {method:'POST', credentials:'include'});
+      if(res.ok){ loadUsers(); } else { alert('Delete failed'); }
+    }
+    loadUsers();
+  </script>
+</body>
+</html>
+
