@@ -24,8 +24,8 @@ This tool is designed to be **useful for everyone** – from regular internet us
 
 ### 1️⃣ Clone the Repository
 ```bash
-git clone https://github.com/gechtech/Group31.git
-cd Group31
+git clone https://github.com/Animhassen/phishing-detector.git
+cd phishing-detector
 ```
 
 
@@ -85,6 +85,7 @@ Whether you are:
 this tool gives you the power to detect threats easily and protect yourself from scams.
 
 This tool gives you the power to detect threats easily and protect yourself from scams.
+
 
 
 
