@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Blocked IPs Dashboard</title>
+  
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #f4f6f9;
+      margin: 0;
+      padding: 20px;
+      color: #333;
+    }
+    h1 {
+      text-align: center;
+      margin-bottom: 20px;
+      color: #222;
+    }
+    .container {
+      max-width: 1000px;
+      margin: auto;
+      background: #fff;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+    th, td {
+      text-align: left;
+      padding: 12px;
+    }
+    th {
+      background: #007BFF;
+      color: white;
+    }
+    tr:nth-child(even) {
+      background: #f8f9fc;
+    }
+    tr:hover {
+      background: #e9f2ff;
+    }
+    .tag {
+      padding: 4px 8px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      display: inline-block;
+    }
+    .active {
+      background: #dc3545;
+      color: white;
+    }
+    .expired {
+      background: #6c757d;
+      color: white;
+    }
+    .refresh-btn {
+      display: block;
+      margin: 10px auto 20px;
+      padding: 10px 20px;
+      background: #007BFF;
+      border: none;
+      color: white;
+      border-radius: 8px;
+      font-size: 14px;
+      cursor: pointer;
+    }
+    .refresh-btn:hover {
+      background: #0056b3;
+    }
+  </style>
+</head>
+<body>
+  <h1>🚨 Blocked IPs Dashboard</h1>
+  <div class="container">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+      <button class="refresh-btn" onclick="loadData()">🔄 Refresh</button>
+      <a href="/admin/logout" style="background: #dc3545; color: white; padding: 10px 20px; text-decoration: none; border-radius: 8px; font-size: 14px;">🚪 Logout</a>
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th>IP Address</th>
+          <th>Penalty (s)</th>
+          <th>Remaining (s)</th>
+          <th>Blocks</th>
+          <th>Reason</th>
+          <th>Category</th>
+          <th>Reason Tag</th>
+          <th>Last Block</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="ipTable"></tbody>
+    </table>
+  </div>
+
+  <script>
+    let updateInterval;
+    
+    async function loadData() {
+      try {
+        const res = await fetch("/status", {
+          credentials: 'include' // Include session cookies
+        });
+        
+        if (res.status === 401) {
+          // Redirect to admin login if not authenticated
+          window.location.href = "/admin";
+          return;
+        }
+        
+        const data = await res.json();
+
+        const tbody = document.getElementById("ipTable");
+        tbody.innerHTML = "";
+
+        if (Object.keys(data.blocked).length === 0) {
+          tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; color: #666;">No blocked IPs at the moment</td></tr>';
+          return;
+        }
+
+        for (const [ip, info] of Object.entries(data.blocked)) {
+          const tr = document.createElement("tr");
+          const remaining = info.remaining || 0;
+          const status = remaining > 0 ? "active" : "expired";
+          const lastBlockTime = info.last_block_time ? new Date(info.last_block_time).toLocaleString() : "N/A";
+
+          const category = categorizeReason(info.last_reason || "");
+          const tag = shortReasonTag(info.last_reason || "");
+          tr.innerHTML = `
+            <td>${ip}</td>
+            <td>${info.penalty}</td>
+            <td id="remaining-${ip.replace(/\./g, '-')}">${remaining}</td>
+            <td>${info.blocks}</td>
+            <td>${info.last_reason || "N/A"}</td>
+            <td>${category}</td>
+            <td>${tag}</td>
+            <td>${lastBlockTime}</td>
+            <td><span class="tag ${status}">${status.toUpperCase()}</span></td>
+            <td>
+              ${remaining > 0 ? `<button onclick="unblockIP('${ip}')" style="background: #dc3545; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 12px;">Unblock</button>` : ''}
+            </td>
+          `;
+          tbody.appendChild(tr);
+        }
+        
+        // Update countdown timers
+        updateCountdowns();
+        
+      } catch (err) {
+        console.error("Failed to load data:", err);
+        document.getElementById("ipTable").innerHTML = '<tr><td colspan="7" style="text-align: center; color: #dc3545;">Error loading data. Please refresh the page.</td></tr>';
+      }
+    }
+
+    function categorizeReason(reason) {
+      const r = (reason||'').toLowerCase();
+      if (r.includes('brut') || r.includes('password') || r.includes('login')) return 'brute-force';
+      if (r.includes('ddos')) return 'ddos';
+      if (r.includes('dos')) return 'dos';
+      if (r.includes('flood') || r.includes('too many') || r.includes('rate')) return 'flooding';
+      if (r.includes('scan') || r.includes('fuzz') || r.includes('probe')) return 'fuzzing';
+      return 'other';
+    }
+    function shortReasonTag(reason){
+      const r=(reason||'').toLowerCase();
+      if (r.includes('brut') || r.includes('password') || r.includes('login')) return 'BRUTE';
+      if (r.includes('ddos')) return 'DDOS';
+      if (r.includes('dos')) return 'DOS';
+      if (r.includes('flood') || r.includes('too many') || r.includes('rate')) return 'FLOOD';
+      if (r.includes('scan') || r.includes('fuzz') || r.includes('probe')) return 'FUZZ';
+      return 'OTHER';
+    }
+    
+    function updateCountdowns() {
+      const remainingElements = document.querySelectorAll('[id^="remaining-"]');
+      remainingElements.forEach(element => {
+        const currentValue = parseInt(element.textContent);
+        if (currentValue > 0) {
+          element.textContent = currentValue - 1;
+        }
+      });
+    }
+    
+    async function unblockIP(ip) {
+      if (!confirm(`Are you sure you want to unblock ${ip}?`)) {
+        return;
+      }
+      
+      try {
+        const res = await fetch(`/unblock/${ip}`, {
+          method: 'POST',
+          credentials: 'include'
+        });
+        
+        if (res.ok) {
+          loadData(); // Refresh the data
+        } else {
+          alert('Failed to unblock IP');
+        }
+      } catch (err) {
+        console.error('Error unblocking IP:', err);
+        alert('Error unblocking IP');
+      }
+    }
+    
+    function startAutoUpdate() {
+      // Load data immediately
+      loadData();
+      
+      // Update every 5 seconds for real-time feel
+      updateInterval = setInterval(() => {
+        loadData();
+      }, 5000);
+      
+      // Update countdowns every second
+      setInterval(updateCountdowns, 1000);
+    }
+    
+    function stopAutoUpdate() {
+      if (updateInterval) {
+        clearInterval(updateInterval);
+      }
+    }
+    
+    // Start auto-updates when page loads
+    startAutoUpdate();
+    
+    // Stop updates when page is hidden, resume when visible
+    document.addEventListener('visibilitychange', function() {
+      if (document.hidden) {
+        stopAutoUpdate();
+      } else {
+        startAutoUpdate();
+      }
+    });
+  </script>
+</body>
+</html>

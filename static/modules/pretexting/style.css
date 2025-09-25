@@ -1,0 +1,148 @@
+/* Page header outside the card */
+.page-header {
+  margin-bottom: 24px;
+}
+
+.page-header .header-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.page-header h1 {
+  font-size: 24px;
+  font-weight: 600;
+  color: #333;
+  margin: 0;
+}
+
+.page-subtitle {
+  color: #6c757d;
+  font-size: 16px;
+  font-weight: 400;
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* Input form styling */
+.grid.two {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.grid.two > div {
+  display: flex;
+  flex-direction: column;
+}
+
+.grid.two label {
+  font-weight: 500;
+  margin-bottom: 6px;
+  color: #333;
+}
+
+.grid.two input {
+  padding: 10px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+.grid.two input:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.row {
+  display: flex;
+  gap: 12px;
+}
+
+.btn {
+  padding: 10px 16px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  background: #111827;
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn:hover {
+  background: #374151;
+}
+
+.btn.outline {
+  background: transparent;
+  color: #111827;
+  border-color: #d1d5db;
+}
+
+.btn.outline:hover {
+  background: #f9fafb;
+}
+
+/* Red flags section */
+.red-flags {
+  color: #dc3545;
+  font-weight: 600;
+  margin-bottom: 12px;
+}
+
+.red-dots {
+  list-style: none;
+  padding: 0;
+}
+
+.red-dots li {
+  position: relative;
+  padding-left: 20px;
+  margin-bottom: 8px;
+  color: #333;
+}
+
+.red-dots li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 8px;
+  width: 6px;
+  height: 6px;
+  background: #dc3545;
+  border-radius: 50%;
+}
+
+/* Green tips section */
+.green-tips {
+  color: #28a745;
+  font-weight: 600;
+  margin-bottom: 12px;
+}
+
+.green-dots {
+  list-style: none;
+  padding: 0;
+}
+
+.green-dots li {
+  position: relative;
+  padding-left: 20px;
+  margin-bottom: 8px;
+  color: #333;
+}
+
+.green-dots li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 8px;
+  width: 6px;
+  height: 6px;
+  background: #28a745;
+  border-radius: 50%;
+}

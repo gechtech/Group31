@@ -1,0 +1,32 @@
+{
+  "active": {
+    "127.0.0.1": {
+      "until": "2025-09-18T15:39:20.793658",
+      "penalty": 20,
+      "blocks": 1,
+      "last_reason": "Flooding: 15 GETs in 9s",
+      "last_block_time": "2025-09-18T15:39:00.793671"
+    }
+  },
+  "history": {
+    "127.0.0.1": {
+      "attempts": 2,
+      "records": [
+        {
+          "until": "2025-09-18T14:11:57.744294",
+          "penalty": 20,
+          "blocks": 1,
+          "last_reason": "Flooding: 15 GETs in 9s",
+          "last_block_time": "2025-09-18T14:11:37.745727"
+        },
+        {
+          "until": "2025-09-18T15:39:20.793658",
+          "penalty": 20,
+          "blocks": 1,
+          "last_reason": "Flooding: 15 GETs in 9s",
+          "last_block_time": "2025-09-18T15:39:00.793671"
+        }
+      ]
+    }
+  }
+}

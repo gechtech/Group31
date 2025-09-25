@@ -1,0 +1,34 @@
+.page-header{margin-bottom:24px}
+.page-header .header-row{display:flex;align-items:center;gap:12px;margin-bottom:8px}
+.page-header h1{font-size:24px;font-weight:600;color:#333;margin:0}
+.page-subtitle{color:#6c757d;font-size:16px;font-weight:400;margin:0;line-height:1.5}
+
+/* Input card */
+#v-phone{width:100%;padding:10px 12px;border:1px solid #d1d5db;border-radius:8px;font-size:14px;margin-bottom:12px}
+.btn.full{width:100%}
+ .status{padding:12px;border-radius:8px;border:1px solid}
+ .status.ok{border-color:#16a34a;background:#ecfdf5;color:#065f46}
+ .status.warn{border-color:#f59e0b;background:#fffbeb;color:#78350f}
+
+/* Scenarios */
+.scenarios-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px}
+.scenario-card{border:1px solid #e5e7eb;border-radius:12px;background:#fff;padding:16px}
+.scenario-pill{display:inline-block;padding:4px 8px;border-radius:6px;font-size:12px;font-weight:600;margin-bottom:6px}
+.scenario-pill.green{background:#e6f4ea;color:#166534}
+.scenario-pill.red{background:#fde2e2;color:#991b1b}
+.scenario-title{font-weight:600;color:#111827;margin-bottom:6px}
+.scenario-number{background:#fde2e2;color:#991b1b;border-radius:6px;padding:6px 8px;margin-bottom:12px}
+.scenario-btn{width:100%}
+
+/* Prevention */
+.red-flags{color:#dc3545;font-weight:600;margin-bottom:12px}
+.green-tips{color:#28a745;font-weight:600;margin-bottom:12px}
+.red-dots,.green-dots{list-style:none;padding:0}
+.red-dots li,.green-dots li{position:relative;padding-left:20px;margin-bottom:8px;color:#333}
+.red-dots li::before,.green-dots li::before{content:"";position:absolute;left:0;top:8px;width:6px;height:6px;border-radius:50%}
+.red-dots li::before{background:#dc3545}
+.green-dots li::before{background:#28a745}
+
+@media (max-width:1024px){.scenarios-grid{grid-template-columns:1fr 1fr}}
+@media (max-width:640px){.scenarios-grid{grid-template-columns:1fr}}
+

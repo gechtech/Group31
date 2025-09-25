@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Website Blocked - Safe Browse Guard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Roboto', sans-serif;
+      background: linear-gradient(135deg, #FF6B6B 0%, #FFB6B6 100%);
+      color: #ffffff;
+      padding: 20px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      margin: 0;
+      box-sizing: border-box;
+      flex-direction: column;
+    }
+
+    .container {
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 15px;
+      padding: 40px 60px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+      max-width: 700px;
+      width: 100%;
+      backdrop-filter: blur(5px);
+      -webkit-backdrop-filter: blur(5px);
+      animation: fadeIn 1s ease-out;
+    }
+
+    h1 {
+      font-size: 3em;
+      margin-bottom: 20px;
+      font-weight: 700;
+      letter-spacing: 1px;
+    }
+
+    p {
+      font-size: 1.2em;
+      margin-bottom: 30px;
+      line-height: 1.6;
+    }
+
+    .buttons {
+      margin-top: 30px;
+    }
+
+    .btn {
+      background: #ffffff;
+      color: #FF6B6B;
+      border: none;
+      padding: 12px 25px;
+      border-radius: 50px;
+      font-size: 1.1em;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-decoration: none;
+      margin: 0 10px;
+      display: inline-block;
+    }
+
+    .btn:hover {
+      background: #eee;
+      transform: translateY(-3px);
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .btn-primary {
+      background: #FF6B6B;
+      color: #ffffff;
+      border: 2px solid #ffffff;
+    }
+
+    .btn-primary:hover {
+      background: #FF4D4D;
+      border-color: #eee;
+    }
+
+    /* Modal Styles */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      overflow: auto;
+      background-color: rgba(0, 0, 0, 0.6);
+      justify-content: center;
+      align-items: center;
+      animation: fadeInModal 0.3s ease-out;
+    }
+
+    .modal-content {
+      background-color: #fefefe;
+      margin: auto;
+      padding: 30px;
+      border-radius: 10px;
+      width: 80%;
+      max-width: 500px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+      color: #333;
+      position: relative;
+      animation: slideIn 0.3s ease-out;
+    }
+
+    .close-button {
+      color: #aaa;
+      font-size: 28px;
+      font-weight: bold;
+      position: absolute;
+      top: 10px;
+      right: 20px;
+      cursor: pointer;
+    }
+
+    .close-button:hover,
+    .close-button:focus {
+      color: #000;
+      text-decoration: none;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes fadeInModal {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    @keyframes slideIn {
+      from { transform: translateY(-50px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>⚠️ Website Blocked!</h1>
+    <p>Safe Browse Guard has identified this website as potentially harmful or unwanted.</p>
+    <p>Blocked URL: <span id="blockedUrl" class="blocked-url"></span></p>
+    <div class="buttons">
+      <a href="#" class="btn btn-primary" id="goBackBtn">Go Back</a>
+      <button class="btn" id="moreInfoBtn">More Info</button>
+    </div>
+  </div>
+
+  <!-- Modal -->
+  <div id="infoModal" class="modal">
+    <div class="modal-content">
+      <span class="close-button">&times;</span>
+      <h2>Why was this site blocked?</h2>
+      <p>This site was blocked because it matched criteria for unsafe content, phishing attempts, or other security risks in our database.</p>
+      <p>If you believe this is a mistake, you can report it as a safe site. However, we recommend not proceeding unless you are certain of its safety.</p>
+      <div class="buttons">
+        <button class="btn btn-primary" id="reportSafeBtn">Report as Safe</button>
+        <button class="btn" id="closeModalBtn">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="block.js"></script>
+</body>
+</html>

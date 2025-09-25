@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Vishing Phone Checker</title>
+  <link rel="stylesheet" href="../shared/style.css" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="container">
+    
+    <div class="page-header">
+      <div class="header-row">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-phone h-6 w-6 text-blue-600"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.65A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-1.18 2.19l-.7.69a19 19 0 0 0 6.6 6.6l.69-.7a2 2 0 0 1 2.19-1.18 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+        <h1>Vishing Phone Checker</h1>
+      </div>
+      <p class="page-subtitle">Analyze phone numbers for spoofing indicators and practice responding to vishing (voice phishing) attack scenarios.</p>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">Phone Number Spoofing Detector</div>
+        <div class="card-desc">Enter a phone number to check for common spoofing patterns</div>
+      </div>
+      <div class="card-content">
+        <label class="visually-hidden" for="v-phone">Phone Number</label>
+        <input id="v-phone" type="tel" placeholder="+1-555-123-4567 or (555) 123-4567" />
+        <div class="row">
+          <button id="btn-keyword" class="btn btn-outline col">Keyword Analysis</button>
+          <button id="btn-ai" class="btn btn-secondary col">AI Analysis</button>
+        </div>
+        <div id="v-result" class="mt-3"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">Vishing Attack Scenarios</div>
+        <div class="card-desc">Practice identifying and responding to common vishing attacks</div>
+      </div>
+      <div class="card-content">
+        <div class="scenarios-grid">
+          <div class="scenario-card">
+            <div class="scenario-pill green">Caller ID Display:</div>
+            <div class="scenario-title">First National Bank</div>
+            <div class="scenario-pill red">Actual Number:</div>
+            <div class="scenario-number">+1-555-0123</div>
+            <button class="btn scenario-btn">Start Scenario</button>
+          </div>
+          <div class="scenario-card">
+            <div class="scenario-pill green">Caller ID Display:</div>
+            <div class="scenario-title">IRS Tax Department</div>
+            <div class="scenario-pill red">Actual Number:</div>
+            <div class="scenario-number">+1-202-555-0199</div>
+            <button class="btn scenario-btn">Start Scenario</button>
+          </div>
+          <div class="scenario-card">
+            <div class="scenario-pill green">Caller ID Display:</div>
+            <div class="scenario-title">Microsoft Support</div>
+            <div class="scenario-pill red">Actual Number:</div>
+            <div class="scenario-number">+1-800-555-0146</div>
+            <button class="btn scenario-btn">Start Scenario</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">Vishing Attack Prevention</div>
+        <div class="card-desc">Learn to recognize and defend against voice phishing attacks</div>
+      </div>
+      <div class="card-content">
+        <div class="grid two">
+          <div>
+            <h4 class="red-flags">Common Vishing Tactics:</h4>
+            <ul class="list-dots red-dots">
+              <li>Caller ID spoofing to appear legitimate</li>
+              <li>Creating urgency or fear (account locked, overdue arrest)</li>
+              <li>Requesting sensitive information for "verification"</li>
+              <li>Impersonating trusted organizations or government</li>
+              <li>Requests for gift cards or wire transfers</li>
+            </ul>
+          </div>
+          <div>
+            <h4 class="green-tips">Protection Strategies:</h4>
+            <ul class="list-dots green-dots">
+              <li>Never give personal info to unsolicited callers</li>
+              <li>Hang up and call back using official numbers</li>
+              <li>Verify urgent requests through other channels</li>
+              <li>Let unknown callers go to voicemail</li>
+              <li>Report suspicious calls to authorities</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
+
+

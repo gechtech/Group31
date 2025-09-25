@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Blocked Websites Management</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(135deg, #0d1117, #1f2937);
+      color: #fff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+
+    .options-container {
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(10px);
+      border-radius: 12px;
+      padding: 30px;
+      max-width: 500px;
+      width: 90%;
+      text-align: center;
+      box-shadow: 0px 8px 20px rgba(0, 0, 0, 0.4);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      animation: fadeIn 0.6s ease-in-out;
+    }
+
+    h1 {
+      font-size: 1.6em;
+      margin-bottom: 10px;
+      color: #4ade80;
+    }
+
+    p {
+      font-size: 0.95em;
+      margin-bottom: 20px;
+      color: #d1d5db;
+    }
+
+    ul {
+      list-style: none;
+      padding: 0;
+      margin: 0 0 15px 0;
+      max-height: 250px;
+      overflow-y: auto;
+    }
+
+    li {
+      background: rgba(255, 255, 255, 0.08);
+      padding: 10px 15px;
+      margin-bottom: 10px;
+      border-radius: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: transform 0.2s ease, background 0.2s ease;
+    }
+
+    li:hover {
+      background: rgba(255, 255, 255, 0.15);
+      transform: scale(1.02);
+    }
+
+    button {
+      background: #ef4444;
+      border: none;
+      padding: 6px 14px;
+      border-radius: 6px;
+      color: #fff;
+      cursor: pointer;
+      font-size: 0.85em;
+      transition: background 0.2s ease, transform 0.2s ease;
+    }
+
+    button:hover {
+      background: #dc2626;
+      transform: scale(1.05);
+    }
+
+    #message {
+      margin-top: 10px;
+      font-size: 0.9em;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+  <div class="options-container">
+    <h1>Manage Blocked Websites</h1>
+    <p>Here you can see the list of websites currently blocked by <strong>SafeBrowse Guard</strong>. Click <b>"Unblock"</b> to remove a website.</p>
+    <ul id="blocked-list">
+      <!-- Blocked URLs will be injected here -->
+    </ul>
+    <div id="message"></div>
+  </div>
+  <script src="options.js"></script>
+</body>
+</html>
