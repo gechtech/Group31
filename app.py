@@ -867,7 +867,7 @@ def index():
         return render_template("index.html", user=current_user)
     else:
         # Guests see the normal landing page
-        return render_template("index1.html", user=current_user)
+        return render_template("dashboard.html", user=current_user)
 
 # Protected index.html page
 @app.route("/index")
@@ -886,7 +886,7 @@ def dashboard_page():
 @app.route("/home")
 @login_required
 def back_home():
-    return render_template("index1.html", user=current_user)
+    return render_template("dashboard.html", user=current_user)
 
 # Route to serve modules directly (for iframe loading)
 @app.route("/modules/<path:module_path>")
