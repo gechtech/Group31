@@ -1,0 +1,385 @@
+/* Quid Pro Quo Security Quiz Styles */
+
+/* Quiz Introduction */
+.quiz-intro {
+  display: flex;
+  gap: 2rem;
+  align-items: flex-start;
+}
+
+.intro-content {
+  flex: 1;
+}
+
+.quiz-features {
+  list-style: none;
+  padding: 0;
+  margin: 1rem 0;
+}
+
+.quiz-features li {
+  padding: 0.5rem 0;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.quiz-rules {
+  background: #f8fafc;
+  padding: 1rem;
+  border-radius: 8px;
+  margin-top: 1rem;
+}
+
+.intro-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+/* Quiz Progress */
+.quiz-progress {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.progress-bar {
+  flex: 1;
+  height: 8px;
+  background: #e5e7eb;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #8b5cf6, #10b981);
+  transition: width 0.3s ease;
+  width: 0%;
+}
+
+.progress-text {
+  font-weight: 600;
+  color: #6b7280;
+  white-space: nowrap;
+}
+
+/* Question Container */
+.question-container {
+  margin-bottom: 2rem;
+}
+
+.question-header {
+  margin-bottom: 2rem;
+}
+
+.question-header h3 {
+  color: #111827;
+  margin-bottom: 1rem;
+  font-size: 1.25rem;
+}
+
+.question-scenario {
+  background: #f8fafc;
+  padding: 1rem;
+  border-radius: 8px;
+  border-left: 4px solid #8b5cf6;
+  color: #6b7280;
+  font-style: italic;
+}
+
+/* Options */
+.options-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-bottom: 2rem;
+}
+
+.option-btn {
+  padding: 1rem;
+  border: 2px solid #e5e7eb;
+  border-radius: 8px;
+  background: white;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.2s ease;
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+.option-btn:hover:not(.disabled) {
+  border-color: #8b5cf6;
+  background: #f8fafc;
+  transform: translateY(-1px);
+}
+
+.option-btn.selected {
+  border-color: #8b5cf6;
+  background: #f3e8ff;
+}
+
+.option-btn.disabled {
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.option-btn.correct {
+  border-color: #10b981;
+  background: #ecfdf5;
+}
+
+.option-btn.incorrect {
+  border-color: #ef4444;
+  background: #fee2e2;
+}
+
+/* Explanation */
+.explanation {
+  margin-top: 1rem;
+  padding: 1rem;
+  border-radius: 8px;
+  background: #f8fafc;
+  border-left: 4px solid #6b7280;
+  font-weight: 500;
+}
+
+/* Quiz Actions */
+.quiz-actions {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+}
+
+/* Results */
+.results-header {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  margin-bottom: 2rem;
+}
+
+.score-circle {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: #f3f4f6;
+  border: 4px solid #e5e7eb;
+  transition: all 0.3s ease;
+}
+
+.score-circle.pass {
+  background: #ecfdf5;
+  border-color: #10b981;
+}
+
+.score-circle.fail {
+  background: #fee2e2;
+  border-color: #ef4444;
+}
+
+.score-number {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #111827;
+}
+
+.score-label {
+  font-size: 0.875rem;
+  color: #6b7280;
+  font-weight: 500;
+}
+
+.results-title h2 {
+  margin: 0 0 0.5rem 0;
+  color: #111827;
+}
+
+.results-subtitle {
+  margin: 0;
+  color: #6b7280;
+}
+
+/* Score Breakdown */
+.score-breakdown {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.score-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  background: #f8fafc;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+}
+
+.score-item .score-label {
+  font-weight: 600;
+  color: #374151;
+}
+
+.score-value {
+  font-weight: 700;
+  font-size: 1.125rem;
+}
+
+.score-value.pass {
+  color: #10b981;
+}
+
+.score-value.fail {
+  color: #ef4444;
+}
+
+/* Recommendations */
+.recommendation-section {
+  background: #f8fafc;
+  padding: 1.5rem;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+  margin-bottom: 1rem;
+}
+
+.recommendation-section h4 {
+  margin: 0 0 1rem 0;
+  color: #111827;
+}
+
+.recommendation-section ul {
+  margin: 1rem 0;
+  padding-left: 1.5rem;
+}
+
+.recommendation-section li {
+  margin-bottom: 0.5rem;
+  color: #374151;
+}
+
+/* Results Actions */
+.results-actions {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+/* Detailed Answers */
+.detailed-answers {
+  margin-top: 2rem;
+}
+
+.answer-item {
+  padding: 1.5rem;
+  margin-bottom: 1rem;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+}
+
+.answer-item.correct {
+  background: #ecfdf5;
+  border-color: #10b981;
+}
+
+.answer-item.incorrect {
+  background: #fee2e2;
+  border-color: #ef4444;
+}
+
+.answer-item h4 {
+  margin: 0 0 1rem 0;
+  color: #111827;
+}
+
+.answer-item p {
+  margin: 0.5rem 0;
+  color: #374151;
+}
+
+/* Button Styles */
+.btn {
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-primary {
+  background: #8b5cf6;
+  color: white;
+}
+
+.btn-primary:hover {
+  background: #7c3aed;
+  transform: translateY(-1px);
+}
+
+.btn-success {
+  background: #10b981;
+  color: white;
+}
+
+.btn-success:hover {
+  background: #059669;
+  transform: translateY(-1px);
+}
+
+.btn-outline {
+  background: transparent;
+  color: #8b5cf6;
+  border: 2px solid #8b5cf6;
+}
+
+.btn-outline:hover {
+  background: #8b5cf6;
+  color: white;
+}
+
+/* Utility Classes */
+.hidden {
+  display: none !important;
+}
+
+.mt-4 {
+  margin-top: 2rem;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .quiz-intro {
+    flex-direction: column;
+  }
+  
+  .results-header {
+    flex-direction: column;
+    text-align: center;
+  }
+  
+  .score-breakdown {
+    grid-template-columns: 1fr;
+  }
+  
+  .quiz-actions,
+  .results-actions {
+    flex-direction: column;
+  }
+  
+  .option-btn {
+    padding: 0.875rem;
+    font-size: 0.875rem;
+  }
+}
