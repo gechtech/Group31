@@ -546,10 +546,15 @@ def admin_logout():
     session.pop("admin", None)
     return redirect(url_for("admin_login"))
 
-@app.route("/admin/change-password", methods=["POST"])
+@app.route("/admin/change-password", methods=["GET", "POST"])
 def admin_change_password():
     if not session.get("admin"):
-        return jsonify({"error": "Unauthorized"}), 401
+        return redirect(url_for("admin_login"))
+    
+    if request.method == "GET":
+        return render_template("admin_change_password.html")
+    
+    # POST method
     new_password = (request.form.get('new_password') or '').strip()
     confirm_password = (request.form.get('confirm_password') or '').strip()
     password_type = (request.form.get('password_type') or 'primary').strip()  # 'primary' or 'secondary'
@@ -710,7 +715,18 @@ def admin_users_delete(user_id: int):
     user = User.query.get(user_id)
     if not user:
         return jsonify({'error': 'User not found'}), 404
-    # Optional: prevent deleting currently logged in user if desired
+    
+    # Log to trash before deleting
+    trash_record = {
+        'id': user.id,
+        'username': user.username,
+        'email': user.email or '',
+        'profile_image': user.profile_image or '',
+        'deleted_at': datetime.utcnow().isoformat(),
+        'deleted_reason': 'admin_action'
+    }
+    _append_trash_record(trash_record)
+    
     db.session.delete(user)
     db.session.commit()
     return jsonify({'message': 'User deleted'})
@@ -837,10 +853,10 @@ def api_delete_account():
     record = {
         'id': current_user.id,
         'username': current_user.username,
-        'email': current_user.email,
-        'profile_image': current_user.profile_image,
+        'email': current_user.email or '',
+        'profile_image': current_user.profile_image or '',
         'deleted_at': datetime.utcnow().isoformat(),
-        'deleted_reason': 'user_requested_logout'
+        'deleted_reason': 'user_self_delete'
     }
     _append_trash_record(record)
     uid = current_user.id
@@ -1596,4 +1612,4 @@ def unblock(ip):
 # ----------------------------
 if __name__ == "__main__":
     # host=0.0.0.0 lets other devices on your LAN reach it
-    app.run(debug=True, host="0.0.0.0", port=3000, threaded=True)
+    app.run(debug=True, host="0.0.0.0", port=2000, threaded=True)
