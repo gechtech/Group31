@@ -1,1 +1,18 @@
-
+[
+  {
+    "id": 2,
+    "username": "an",
+    "email": "an@gmail.com",
+    "profile_image": "",
+    "deleted_at": "2025-09-28T12:46:31.069148",
+    "deleted_reason": "admin_action"
+  },
+  {
+    "id": 3,
+    "username": "amir",
+    "email": "amir@d.com",
+    "profile_image": "",
+    "deleted_at": "2025-09-28T12:47:38.446742",
+    "deleted_reason": "user_self_delete"
+  }
+]

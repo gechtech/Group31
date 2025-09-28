@@ -23,7 +23,7 @@ load_dotenv(dotenv_path=os.path.join(os.path.dirname(os.path.abspath(__file__)),
 # Config (tune to your needs)
 # ----------------------------
 WINDOW_SECONDS        = 9
-MAX_REQUESTS_WINDOW   = 25           # 15 requests in 5s = block
+MAX_REQUESTS_WINDOW   = 15           # 15 requests in 5s = block
 BASE_BLOCK_SECONDS    = 20
 BLOCK_MULTIPLIER      = 2
 MAX_BLOCK_SECONDS     = 10 * 60      # 10 minutes
@@ -163,6 +163,9 @@ resp_log = defaultdict(deque)   # ip -> timestamps (200 + 404 only)
 blocked  = {}                   # ip -> {"until": datetime, "penalty": int}
 lock     = threading.RLock()
 blocked_history = {}            # ip -> {"attempts": int, "records": [ { .. } ]}
+expired_blocks = []             # List of expired blocks for admin dashboard
+today_blocks_count = 0          # Count of blocks created today
+last_reset_date = datetime.utcnow().date()  # Track when we last reset daily count
 
 # ----------------------------
 # Helpers
@@ -239,7 +242,10 @@ def save_blocked():
                 }
                 for ip, info in blocked.items()
             },
-            "history": {}
+            "history": {},
+            "expired": expired_blocks,
+            "today_count": today_blocks_count,
+            "last_reset": last_reset_date.isoformat()
         }
 
         # Convert history, making sure all 'until' fields are strings
@@ -264,6 +270,8 @@ def load_blocked():
             data = json.load(f)
 
         with lock:
+            global expired_blocks, today_blocks_count, last_reset_date
+            
             # Load active
             for ip, info in data.get("active", {}).items():
                 until = datetime.fromisoformat(info["until"])
@@ -276,7 +284,6 @@ def load_blocked():
                 }
 
             # Load history
-            global blocked_history
             blocked_history = {}
             for ip, hist in data.get("history", {}).items():
                 records = []
@@ -289,6 +296,22 @@ def load_blocked():
                             pass
                     records.append(rec_copy)
                 blocked_history[ip] = {"attempts": hist["attempts"], "records": records}
+            
+            # Load expired blocks and daily count
+            expired_blocks = data.get("expired", [])
+            today_blocks_count = data.get("today_count", 0)
+            
+            # Check if we need to reset daily count
+            try:
+                saved_date = datetime.fromisoformat(data.get("last_reset", datetime.utcnow().date().isoformat())).date()
+                if saved_date != datetime.utcnow().date():
+                    today_blocks_count = 0
+                    last_reset_date = datetime.utcnow().date()
+                else:
+                    last_reset_date = saved_date
+            except Exception:
+                last_reset_date = datetime.utcnow().date()
+                
     except Exception as e:
         print(f"[WARN] Failed to load blocked IPs: {e}")
 
@@ -307,6 +330,14 @@ def get_blocked_history():
 load_blocked()
 atexit.register(save_blocked)
 
+# Initialize global variables if not loaded
+if 'expired_blocks' not in globals():
+    expired_blocks = []
+if 'today_blocks_count' not in globals():
+    today_blocks_count = 0
+if 'last_reset_date' not in globals():
+    last_reset_date = datetime.utcnow().date()
+
 
 
 def is_blocked(ip: str) -> int:
@@ -315,18 +346,42 @@ def is_blocked(ip: str) -> int:
         if not info: return 0
         remain = int((info["until"] - datetime.utcnow()).total_seconds())
         if remain <= 0:
+            # Move to expired blocks before removing
+            expired_block = {
+                "ip": ip,
+                "penalty": info.get("penalty", 0),
+                "blocks": info.get("blocks", 1),
+                "reason": info.get("last_reason", "N/A"),
+                "expired_at": datetime.utcnow().isoformat(),
+                "last_block_time": info.get("last_block_time", "")
+            }
+            expired_blocks.insert(0, expired_block)
+            # Keep only last 100 expired blocks
+            if len(expired_blocks) > 100:
+                expired_blocks.pop()
+            
             blocked.pop(ip, None)
+            save_blocked()
             return 0
         return remain
 
 def block_ip(ip: str, reason: str):
     with lock:
+        global today_blocks_count, last_reset_date
+        
+        # Reset daily count if new day
+        current_date = datetime.utcnow().date()
+        if current_date != last_reset_date:
+            today_blocks_count = 0
+            last_reset_date = current_date
+        
         penalty = BASE_BLOCK_SECONDS
         if ip in blocked:
             penalty = min(blocked[ip]["penalty"] * BLOCK_MULTIPLIER, MAX_BLOCK_SECONDS)
             blocked[ip]["blocks"] += 1
         else:
             blocked[ip] = {"blocks": 1}
+            today_blocks_count += 1  # Increment daily count for new IPs
 
         until = datetime.utcnow() + timedelta(seconds=penalty)
         block_info = {
@@ -545,6 +600,184 @@ def blocked_dashboard():
         return redirect(url_for("admin_login"))
     # serve the blocked.html file (place it in same folder as app.py)
     return send_from_directory(os.path.dirname(__file__), "blocked.html")
+
+@app.route("/blocked_ips.json")
+def blocked_ips_json():
+    if not session.get("admin"):
+        return jsonify({"error": "Unauthorized"}), 401
+    
+    with lock:
+        # Clean up expired blocks first
+        expired_ips = []
+        for ip in list(blocked.keys()):
+            remaining = max(0, int((blocked[ip]["until"] - datetime.utcnow()).total_seconds()))
+            if remaining <= 0:
+                # Move to expired
+                info = blocked[ip]
+                expired_block = {
+                    "ip": ip,
+                    "penalty": info.get("penalty", 0),
+                    "blocks": info.get("blocks", 1),
+                    "reason": info.get("last_reason", "N/A"),
+                    "expired_at": datetime.utcnow().isoformat(),
+                    "last_block_time": info.get("last_block_time", "")
+                }
+                expired_blocks.insert(0, expired_block)
+                expired_ips.append(ip)
+        
+        # Remove expired IPs from active blocks
+        for ip in expired_ips:
+            blocked.pop(ip, None)
+        
+        # Keep only last 100 expired blocks
+        if len(expired_blocks) > 100:
+            expired_blocks[:] = expired_blocks[:100]
+        
+        # Build response
+        blocked_view = {}
+        total_blocks_today = today_blocks_count
+        
+        for ip, info in blocked.items():
+            remaining = max(0, int((info["until"] - datetime.utcnow()).total_seconds()))
+            blocked_view[ip] = {
+                "penalty": info["penalty"],
+                "remaining": remaining,
+                "blocks": info.get("blocks", 1),
+                "last_reason": info.get("last_reason", ""),
+                "last_block_time": info.get("last_block_time", "")
+            }
+            total_blocks_today += info.get("blocks", 1)
+        
+        response_data = {
+            "active": blocked_view,
+            "expired": expired_blocks[:50],  # Return last 50 expired
+            "stats": {
+                "active_count": len(blocked_view),
+                "total_today": total_blocks_today,
+                "expired_count": len(expired_blocks)
+            }
+        }
+    
+    if expired_ips:  # Save if we moved any blocks to expired
+        save_blocked()
+    
+    return jsonify(response_data), 200
+
+@app.route("/block_ip", methods=["POST"])
+def manual_block_ip():
+    if not session.get("admin"):
+        return jsonify({"error": "Unauthorized"}), 401
+    
+    data = request.get_json()
+    ip = data.get('ip', '').strip()
+    penalty = int(data.get('penalty', 60))
+    reason = data.get('reason', 'Manual block')
+    
+    if not ip:
+        return jsonify({"error": "IP address is required"}), 400
+    
+    with lock:
+        global today_blocks_count, last_reset_date
+        
+        # Reset daily count if new day
+        current_date = datetime.utcnow().date()
+        if current_date != last_reset_date:
+            today_blocks_count = 0
+            last_reset_date = current_date
+        
+        until = datetime.utcnow() + timedelta(seconds=penalty * 60)  # Convert minutes to seconds
+        is_new_ip = ip not in blocked
+        
+        blocked[ip] = {
+            "until": until,
+            "penalty": penalty,
+            "blocks": blocked.get(ip, {}).get("blocks", 0) + 1,
+            "last_reason": reason,
+            "last_block_time": datetime.utcnow().isoformat()
+        }
+        
+        if is_new_ip:
+            today_blocks_count += 1
+    
+    save_blocked()
+    return jsonify({"message": f"IP {ip} blocked for {penalty} minutes"}), 200
+
+@app.route("/clear_expired", methods=["POST"])
+def clear_expired_blocks():
+    if not session.get("admin"):
+        return jsonify({"error": "Unauthorized"}), 401
+    
+    with lock:
+        global expired_blocks
+        expired_blocks = []
+    
+    save_blocked()
+    return jsonify({"message": "Expired blocks cleared"}), 200
+
+@app.route("/unblock_all", methods=["POST"])
+def unblock_all_ips():
+    if not session.get("admin"):
+        return jsonify({"error": "Unauthorized"}), 401
+    
+    with lock:
+        # Move all active blocks to expired before clearing
+        for ip, info in blocked.items():
+            expired_block = {
+                "ip": ip,
+                "penalty": info.get("penalty", 0),
+                "blocks": info.get("blocks", 1),
+                "reason": info.get("last_reason", "N/A") + " (Unblocked by admin)",
+                "expired_at": datetime.utcnow().isoformat(),
+                "last_block_time": info.get("last_block_time", "")
+            }
+            expired_blocks.insert(0, expired_block)
+        
+        # Keep only last 100 expired blocks
+        if len(expired_blocks) > 100:
+            expired_blocks[:] = expired_blocks[:100]
+        
+        # Clear all active blocks
+        blocked.clear()
+        req_log.clear()
+        resp_log.clear()
+    
+    save_blocked()
+    return jsonify({"message": "All IPs unblocked"}), 200
+
+@app.route("/export_blocked_data")
+def export_blocked_data():
+    if not session.get("admin"):
+        return jsonify({"error": "Unauthorized"}), 401
+    
+    with lock:
+        export_data = []
+        
+        # Add active blocks
+        for ip, info in blocked.items():
+            remaining = max(0, int((info["until"] - datetime.utcnow()).total_seconds()))
+            export_data.append({
+                "ip": ip,
+                "status": "Active",
+                "penalty": info.get("penalty", 0),
+                "remaining": remaining,
+                "blocks": info.get("blocks", 1),
+                "reason": info.get("last_reason", "N/A"),
+                "last_block_time": info.get("last_block_time", "")
+            })
+        
+        # Add expired blocks
+        for block in expired_blocks:
+            export_data.append({
+                "ip": block["ip"],
+                "status": "Expired",
+                "penalty": block.get("penalty", 0),
+                "remaining": 0,
+                "blocks": block.get("blocks", 1),
+                "reason": block.get("reason", "N/A"),
+                "last_block_time": block.get("expired_at", "")
+            })
+    
+    return jsonify({"data": export_data}), 200
 
 @app.route("/admin/logout")
 def admin_logout():
@@ -1594,7 +1827,12 @@ def status():
     summary.update({
         "blocked": blocked_view,
         "reqCounts": req_counts,
-        "respCounts": resp_counts
+        "respCounts": resp_counts,
+        "stats": {
+            "active_count": len(blocked_view),
+            "total_today": today_blocks_count,
+            "expired_count": len(expired_blocks)
+        }
     })
     return jsonify(summary), 200
 
@@ -1607,9 +1845,28 @@ def unblock(ip):
         return jsonify({"error": "Unauthorized"}), 401
     
     with lock:
+        # Move to expired before removing if it exists
+        if ip in blocked:
+            info = blocked[ip]
+            expired_block = {
+                "ip": ip,
+                "penalty": info.get("penalty", 0),
+                "blocks": info.get("blocks", 1),
+                "reason": info.get("last_reason", "N/A") + " (Unblocked by admin)",
+                "expired_at": datetime.utcnow().isoformat(),
+                "last_block_time": info.get("last_block_time", "")
+            }
+            expired_blocks.insert(0, expired_block)
+            
+            # Keep only last 100 expired blocks
+            if len(expired_blocks) > 100:
+                expired_blocks.pop()
+        
         blocked.pop(ip, None)
         req_log.pop(ip, None)
         resp_log.pop(ip, None)
+    
+    save_blocked()
     return jsonify({"message": f"Unblocked {ip}"}), 200
 
 # ----------------------------
