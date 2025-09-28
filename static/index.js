@@ -16,6 +16,12 @@
     iframe.src = path;
     content.innerHTML = '';
     content.appendChild(iframe);
+    // Notify translator when module loads
+    iframe.onload = function() {
+      if (window.simpleTranslator && window.simpleTranslator.isTranslated) {
+        setTimeout(() => window.simpleTranslator.translateModuleContent(), 100);
+      }
+    };
     // Update active state
     const match = Array.from(navItems).find(a => {
       const dp = a.getAttribute('data-path');
@@ -40,6 +46,12 @@
 
   window.addEventListener('hashchange', function(){
     const hash = location.hash.replace('#/','');
-    if (hash) loadModule(hash);
+    if (hash) {
+      loadModule(hash);
+      // Translate new module if translation is active
+      if (window.simpleTranslator && window.simpleTranslator.isTranslated) {
+        setTimeout(() => window.simpleTranslator.translateModuleContent(), 200);
+      }
+    }
   });
 })();

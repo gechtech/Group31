@@ -23,7 +23,7 @@ load_dotenv(dotenv_path=os.path.join(os.path.dirname(os.path.abspath(__file__)),
 # Config (tune to your needs)
 # ----------------------------
 WINDOW_SECONDS        = 9
-MAX_REQUESTS_WINDOW   = 15           # 15 requests in 5s = block
+MAX_REQUESTS_WINDOW   = 25           # 15 requests in 5s = block
 BASE_BLOCK_SECONDS    = 20
 BLOCK_MULTIPLIER      = 2
 MAX_BLOCK_SECONDS     = 10 * 60      # 10 minutes
@@ -512,7 +512,12 @@ def admin_login():
         return redirect(url_for("admin_home"))
     if request.method == "POST":
         password = request.form.get("password")
-        username = request.form.get("username")  # Support username field
+        username = request.form.get("username", "").strip()
+        
+        # Validate username must be exactly "admin"
+        if username != "admin":
+            return render_template("admin_login.html", error="Invalid username or password")
+        
         if password:
             # Check both primary and secondary passwords
             primary_hash = ADMIN_PASSWORD_DATA.get('primary_password_hash')
@@ -525,7 +530,7 @@ def admin_login():
                 session["last_activity"] = datetime.utcnow().isoformat()
                 return redirect(url_for("admin_home"))
         
-        return render_template("admin_login.html", error="Invalid password")
+        return render_template("admin_login.html", error="Invalid username or password")
     return render_template("admin_login.html", error=None)
 
 @app.route("/admin/home")

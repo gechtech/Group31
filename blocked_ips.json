@@ -1,8 +1,16 @@
 {
-  "active": {},
+  "active": {
+    "127.0.0.1": {
+      "until": "2025-09-28T11:49:58.141120",
+      "penalty": 20,
+      "blocks": 1,
+      "last_reason": "Flooding: 25 GETs in 9s",
+      "last_block_time": "2025-09-28T11:49:38.141128"
+    }
+  },
   "history": {
     "127.0.0.1": {
-      "attempts": 3,
+      "attempts": 7,
       "records": [
         {
           "until": "2025-09-18T14:11:57.744294",
@@ -24,6 +32,34 @@
           "blocks": 1,
           "last_reason": "Flooding: 15 GETs in 9s",
           "last_block_time": "2025-09-25T09:58:32.660383"
+        },
+        {
+          "until": "2025-09-28T08:12:39.649080",
+          "penalty": 20,
+          "blocks": 1,
+          "last_reason": "Flooding: 15 GETs in 9s",
+          "last_block_time": "2025-09-28T08:12:19.649830"
+        },
+        {
+          "until": "2025-09-28T11:33:14.489557",
+          "penalty": 20,
+          "blocks": 1,
+          "last_reason": "Flooding: 25 GETs in 9s",
+          "last_block_time": "2025-09-28T11:32:54.490601"
+        },
+        {
+          "until": "2025-09-28T11:40:09.472228",
+          "penalty": 20,
+          "blocks": 1,
+          "last_reason": "Flooding: 25 GETs in 9s",
+          "last_block_time": "2025-09-28T11:39:49.472234"
+        },
+        {
+          "until": "2025-09-28T11:49:58.141120",
+          "penalty": 20,
+          "blocks": 1,
+          "last_reason": "Flooding: 25 GETs in 9s",
+          "last_block_time": "2025-09-28T11:49:38.141128"
         }
       ]
     }
