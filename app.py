@@ -1,7 +1,7 @@
 from flask import Flask, request, jsonify, render_template, make_response, redirect, url_for, flash, send_from_directory, get_flashed_messages
 from flask_cors import CORS
 from collections import defaultdict, deque
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 import threading, time, json, os, atexit
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -10,7 +10,6 @@ from dotenv import load_dotenv
 from urllib.parse import urlparse
 import requests
 from flask import Flask, request, jsonify, render_template_string, redirect, url_for, session, send_from_directory
-from datetime import datetime, timedelta
 import os
 import json as _json
 import secrets
@@ -165,7 +164,7 @@ lock     = threading.RLock()
 blocked_history = {}            # ip -> {"attempts": int, "records": [ { .. } ]}
 expired_blocks = []             # List of expired blocks for admin dashboard
 today_blocks_count = 0          # Count of blocks created today
-last_reset_date = datetime.utcnow().date()  # Track when we last reset daily count
+last_reset_date = datetime.now(UTC).date()  # Track when we last reset daily count
 
 # ----------------------------
 # Helpers
@@ -186,7 +185,7 @@ def prune_window(dq, window, now):
         dq.popleft()
 
 def log_block(ip, reason, penalty):
-    line = f"{datetime.utcnow().isoformat()} :: {ip} blocked for {penalty}s :: {reason}\n"
+    line = f"{datetime.now(UTC).isoformat()} :: {ip} blocked for {penalty}s :: {reason}\n"
     with open("blocked_history.log", "a") as f:
         f.write(line)
 
@@ -303,14 +302,14 @@ def load_blocked():
             
             # Check if we need to reset daily count
             try:
-                saved_date = datetime.fromisoformat(data.get("last_reset", datetime.utcnow().date().isoformat())).date()
-                if saved_date != datetime.utcnow().date():
+                saved_date = datetime.fromisoformat(data.get("last_reset", datetime.now(UTC).date().isoformat())).date()
+                if saved_date != datetime.now(UTC).date():
                     today_blocks_count = 0
-                    last_reset_date = datetime.utcnow().date()
+                    last_reset_date = datetime.now(UTC).date()
                 else:
                     last_reset_date = saved_date
             except Exception:
-                last_reset_date = datetime.utcnow().date()
+                last_reset_date = datetime.now(UTC).date()
                 
     except Exception as e:
         print(f"[WARN] Failed to load blocked IPs: {e}")
@@ -336,7 +335,7 @@ if 'expired_blocks' not in globals():
 if 'today_blocks_count' not in globals():
     today_blocks_count = 0
 if 'last_reset_date' not in globals():
-    last_reset_date = datetime.utcnow().date()
+    last_reset_date = datetime.now(UTC).date()
 
 
 
@@ -344,7 +343,7 @@ def is_blocked(ip: str) -> int:
     with lock:
         info = blocked.get(ip)
         if not info: return 0
-        remain = int((info["until"] - datetime.utcnow()).total_seconds())
+        remain = int((info["until"] - datetime.now(UTC)).total_seconds())
         if remain <= 0:
             # Move to expired blocks before removing
             expired_block = {
@@ -352,7 +351,7 @@ def is_blocked(ip: str) -> int:
                 "penalty": info.get("penalty", 0),
                 "blocks": info.get("blocks", 1),
                 "reason": info.get("last_reason", "N/A"),
-                "expired_at": datetime.utcnow().isoformat(),
+                "expired_at": datetime.now(UTC).isoformat(),
                 "last_block_time": info.get("last_block_time", "")
             }
             expired_blocks.insert(0, expired_block)
@@ -370,7 +369,7 @@ def block_ip(ip: str, reason: str):
         global today_blocks_count, last_reset_date
         
         # Reset daily count if new day
-        current_date = datetime.utcnow().date()
+        current_date = datetime.now(UTC).date()
         if current_date != last_reset_date:
             today_blocks_count = 0
             last_reset_date = current_date
@@ -383,13 +382,13 @@ def block_ip(ip: str, reason: str):
             blocked[ip] = {"blocks": 1}
             today_blocks_count += 1  # Increment daily count for new IPs
 
-        until = datetime.utcnow() + timedelta(seconds=penalty)
+        until = datetime.now(UTC) + timedelta(seconds=penalty)
         block_info = {
             "until": until,
             "penalty": penalty,
             "blocks": blocked[ip]["blocks"],
             "last_reason": reason,
-            "last_block_time": datetime.utcnow().isoformat()
+            "last_block_time": datetime.now(UTC).isoformat()
         }
         blocked[ip].update(block_info)
 
@@ -469,7 +468,7 @@ def enforce_session_timeout():
     # Admin session timeout
     if session.get('admin'):
         last = session.get('last_activity')
-        now = datetime.utcnow()
+        now = datetime.now(UTC)
         try:
             last_dt = datetime.fromisoformat(last) if last else None
         except Exception:
@@ -483,7 +482,7 @@ def enforce_session_timeout():
     # User session timeout (Flask-Login)
     if current_user.is_authenticated:
         last = session.get('last_activity')
-        now = datetime.utcnow()
+        now = datetime.now(UTC)
         try:
             last_dt = datetime.fromisoformat(last) if last else None
         except Exception:
@@ -582,7 +581,7 @@ def admin_login():
                (secondary_hash and check_password_hash(secondary_hash, password)):
                 session["admin"] = True
                 session.permanent = True
-                session["last_activity"] = datetime.utcnow().isoformat()
+                session["last_activity"] = datetime.now(UTC).isoformat()
                 return redirect(url_for("admin_home"))
         
         return render_template("admin_login.html", error="Invalid username or password")
@@ -610,7 +609,7 @@ def blocked_ips_json():
         # Clean up expired blocks first
         expired_ips = []
         for ip in list(blocked.keys()):
-            remaining = max(0, int((blocked[ip]["until"] - datetime.utcnow()).total_seconds()))
+            remaining = max(0, int((blocked[ip]["until"] - datetime.now(UTC)).total_seconds()))
             if remaining <= 0:
                 # Move to expired
                 info = blocked[ip]
@@ -619,7 +618,7 @@ def blocked_ips_json():
                     "penalty": info.get("penalty", 0),
                     "blocks": info.get("blocks", 1),
                     "reason": info.get("last_reason", "N/A"),
-                    "expired_at": datetime.utcnow().isoformat(),
+                    "expired_at": datetime.now(UTC).isoformat(),
                     "last_block_time": info.get("last_block_time", "")
                 }
                 expired_blocks.insert(0, expired_block)
@@ -638,7 +637,7 @@ def blocked_ips_json():
         total_blocks_today = today_blocks_count
         
         for ip, info in blocked.items():
-            remaining = max(0, int((info["until"] - datetime.utcnow()).total_seconds()))
+            remaining = max(0, int((info["until"] - datetime.now(UTC)).total_seconds()))
             blocked_view[ip] = {
                 "penalty": info["penalty"],
                 "remaining": remaining,
@@ -680,12 +679,12 @@ def manual_block_ip():
         global today_blocks_count, last_reset_date
         
         # Reset daily count if new day
-        current_date = datetime.utcnow().date()
+        current_date = datetime.now(UTC).date()
         if current_date != last_reset_date:
             today_blocks_count = 0
             last_reset_date = current_date
         
-        until = datetime.utcnow() + timedelta(seconds=penalty * 60)  # Convert minutes to seconds
+        until = datetime.now(UTC) + timedelta(seconds=penalty * 60)  # Convert minutes to seconds
         is_new_ip = ip not in blocked
         
         blocked[ip] = {
@@ -693,7 +692,7 @@ def manual_block_ip():
             "penalty": penalty,
             "blocks": blocked.get(ip, {}).get("blocks", 0) + 1,
             "last_reason": reason,
-            "last_block_time": datetime.utcnow().isoformat()
+            "last_block_time": datetime.now(UTC).isoformat()
         }
         
         if is_new_ip:
@@ -727,7 +726,7 @@ def unblock_all_ips():
                 "penalty": info.get("penalty", 0),
                 "blocks": info.get("blocks", 1),
                 "reason": info.get("last_reason", "N/A") + " (Unblocked by admin)",
-                "expired_at": datetime.utcnow().isoformat(),
+                "expired_at": datetime.now(UTC).isoformat(),
                 "last_block_time": info.get("last_block_time", "")
             }
             expired_blocks.insert(0, expired_block)
@@ -754,7 +753,7 @@ def export_blocked_data():
         
         # Add active blocks
         for ip, info in blocked.items():
-            remaining = max(0, int((info["until"] - datetime.utcnow()).total_seconds()))
+            remaining = max(0, int((info["until"] - datetime.now(UTC)).total_seconds()))
             export_data.append({
                 "ip": ip,
                 "status": "Active",
@@ -843,7 +842,7 @@ def login_page():
             if user.check_password(password):
                 login_user(user)
                 session.permanent = True
-                session["last_activity"] = datetime.utcnow().isoformat()
+                session["last_activity"] = datetime.now(UTC).isoformat()
                 next_page = request.args.get('next')
                 if next_page and urlparse(next_page).netloc == request.host:
                     return redirect(next_page)
@@ -851,7 +850,7 @@ def login_page():
 
             # Then try valid temporary password (unexpired)
             if user.temp_password_hash and user.temp_password_expires_at:
-                if datetime.utcnow() <= (user.temp_password_expires_at or datetime.utcnow() - timedelta(seconds=1)):
+                if datetime.now(UTC) <= (user.temp_password_expires_at or datetime.now(UTC) - timedelta(seconds=1)):
                     if check_password_hash(user.temp_password_hash, password):
                         # One-time use: immediately clear temp credentials
                         user.temp_password_hash = None
@@ -859,7 +858,7 @@ def login_page():
                         db.session.commit()
                         login_user(user)
                         session.permanent = True
-                        session["last_activity"] = datetime.utcnow().isoformat()
+                        session["last_activity"] = datetime.now(UTC).isoformat()
                         session['used_temp_password'] = True
                         next_page = request.args.get('next')
                         if next_page and urlparse(next_page).netloc == request.host:
@@ -960,7 +959,7 @@ def admin_users_delete(user_id: int):
         'username': user.username,
         'email': user.email or '',
         'profile_image': user.profile_image or '',
-        'deleted_at': datetime.utcnow().isoformat(),
+        'deleted_at': datetime.now(UTC).isoformat(),
         'deleted_reason': 'admin_action'
     }
     _append_trash_record(trash_record)
@@ -1011,7 +1010,7 @@ def admin_set_temp_password(user_id: int):
     # Generate and store temp password (hashed) with expiry
     temp_plain = _generate_temp_password(12)
     user.temp_password_hash = generate_password_hash(temp_plain)
-    user.temp_password_expires_at = datetime.utcnow() + timedelta(seconds=TEMP_PASSWORD_TTL_SECONDS)
+    user.temp_password_expires_at = datetime.now(UTC) + timedelta(seconds=TEMP_PASSWORD_TTL_SECONDS)
     user.temp_password_grants = user.temp_password_grants + 1
     db.session.commit()
     # Return plaintext temp password so admin can share once
@@ -1093,7 +1092,7 @@ def api_delete_account():
         'username': current_user.username,
         'email': current_user.email or '',
         'profile_image': current_user.profile_image or '',
-        'deleted_at': datetime.utcnow().isoformat(),
+        'deleted_at': datetime.now(UTC).isoformat(),
         'deleted_reason': 'user_self_delete'
     }
     _append_trash_record(record)
@@ -1792,7 +1791,7 @@ def contact():
     if not name or not email or not message:
         return jsonify({"error": "All fields are required."}), 400
 
-    ts = datetime.utcnow().strftime("%Y-%m-%dT%H-%M-%S")
+    ts = datetime.now(UTC).strftime("%Y-%m-%dT%H-%M-%S")
     path = os.path.join(COMMENTS_FOLDER, f"comment-{ts}.txt")
     with open(path, "w", encoding="utf-8") as f:
         f.write(f"Name: {name}\nEmail: {email}\nMessage: {message}\n")
@@ -1814,7 +1813,7 @@ def status():
         blocked_view = {
             ip: {
                 "penalty": info["penalty"],
-                "remaining": max(0, int((info["until"] - datetime.utcnow()).total_seconds())),
+                "remaining": max(0, int((info["until"] - datetime.now(UTC)).total_seconds())),
                 "blocks": info.get("blocks", 1),
                 "last_reason": info.get("last_reason", ""),
                 "last_block_time": info.get("last_block_time", "")
@@ -1853,7 +1852,7 @@ def unblock(ip):
                 "penalty": info.get("penalty", 0),
                 "blocks": info.get("blocks", 1),
                 "reason": info.get("last_reason", "N/A") + " (Unblocked by admin)",
-                "expired_at": datetime.utcnow().isoformat(),
+                "expired_at": datetime.now(UTC).isoformat(),
                 "last_block_time": info.get("last_block_time", "")
             }
             expired_blocks.insert(0, expired_block)
