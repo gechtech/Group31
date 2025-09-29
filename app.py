@@ -21,7 +21,7 @@ load_dotenv(dotenv_path=os.path.join(os.path.dirname(os.path.abspath(__file__)),
 # ----------------------------
 # Config (tune to your needs)
 # ----------------------------
-WINDOW_SECONDS        = 9
+WINDOW_SECONDS        = 15
 MAX_REQUESTS_WINDOW   = 15           # 15 requests in 5s = block
 BASE_BLOCK_SECONDS    = 20
 BLOCK_MULTIPLIER      = 2
@@ -30,6 +30,7 @@ BLOCKED_IPS_FILE      = "blocked_ips.json"
 USE_X_FORWARDED_FOR   = True         # honor X-Forwarded-For when behind a proxy
 ADMIN_TOKEN           = os.getenv("ADMIN_TOKEN", None)  # optional for /unblock
 EXTENSION_TOKEN       = os.getenv("EXTENSION_TOKEN", None)  # for /ext/* endpoints
+EXCLUDED_IPS_FILE     = "excluded_ips.json"  # File to store excluded IPs
 
 APP_DIR               = os.path.dirname(os.path.abspath(__file__))
 COMMENTS_FOLDER       = os.path.join(APP_DIR, "comments")
@@ -165,6 +166,7 @@ blocked_history = {}            # ip -> {"attempts": int, "records": [ { .. } ]}
 expired_blocks = []             # List of expired blocks for admin dashboard
 today_blocks_count = 0          # Count of blocks created today
 last_reset_date = datetime.now(UTC).date()  # Track when we last reset daily count
+excluded_ips = set()            # Set of IPs that should never be blocked
 
 # ----------------------------
 # Helpers
@@ -227,6 +229,31 @@ def get_groq_api_key():
         return None
     key = raw.strip().strip('"').strip("'")
     return key or None
+
+def load_excluded_ips():
+    """Load excluded IPs from file"""
+    global excluded_ips
+    try:
+        if os.path.exists(EXCLUDED_IPS_FILE):
+            with open(EXCLUDED_IPS_FILE, "r") as f:
+                data = json.load(f)
+                excluded_ips = set(data.get("excluded_ips", []))
+    except Exception as e:
+        print(f"[WARN] Failed to load excluded IPs: {e}")
+        excluded_ips = set()
+
+def save_excluded_ips():
+    """Save excluded IPs to file"""
+    try:
+        data = {"excluded_ips": list(excluded_ips)}
+        with open(EXCLUDED_IPS_FILE, "w") as f:
+            json.dump(data, f, indent=2)
+    except Exception as e:
+        print(f"[WARN] Failed to save excluded IPs: {e}")
+
+def is_ip_excluded(ip: str) -> bool:
+    """Check if an IP is in the exclusion list"""
+    return ip in excluded_ips
 
 def save_blocked():
     with lock:
@@ -327,7 +354,9 @@ def get_blocked_history():
 
 
 load_blocked()
+load_excluded_ips()
 atexit.register(save_blocked)
+atexit.register(save_excluded_ips)
 
 # Initialize global variables if not loaded
 if 'expired_blocks' not in globals():
@@ -365,6 +394,10 @@ def is_blocked(ip: str) -> int:
         return remain
 
 def block_ip(ip: str, reason: str):
+    # Skip blocking for excluded IPs
+    if is_ip_excluded(ip):
+        return None
+        
     with lock:
         global today_blocks_count, last_reset_date
         
@@ -417,6 +450,11 @@ def waf_before():
     if path.startswith("/static/") or path.startswith("/login/assets/") or path == "/favicon.ico":
         return
     ip = client_ip()
+    
+    # Skip blocking for excluded IPs
+    if is_ip_excluded(ip):
+        return
+    
     remaining = is_blocked(ip)
     if remaining > 0:
         return render_countdown(remaining)
@@ -437,6 +475,11 @@ def waf_before():
 @app.after_request
 def waf_after(response):
     ip = client_ip()
+    
+    # Skip blocking for excluded IPs
+    if is_ip_excluded(ip):
+        return response
+    
     status = response.status_code
     if status in (200, 404):  # ✅ count both 200 and 404
         ts = now_ts()
@@ -599,6 +642,12 @@ def blocked_dashboard():
         return redirect(url_for("admin_login"))
     # serve the blocked.html file (place it in same folder as app.py)
     return send_from_directory(os.path.dirname(__file__), "blocked.html")
+
+@app.route("/admin/excluded-ips")
+def excluded_ips_dashboard():
+    if not session.get("admin"):
+        return redirect(url_for("admin_login"))
+    return render_template("admin_excluded_ips.html")
 
 @app.route("/blocked_ips.json")
 def blocked_ips_json():
@@ -782,6 +831,67 @@ def export_blocked_data():
 def admin_logout():
     session.pop("admin", None)
     return redirect(url_for("admin_login"))
+
+@app.route("/excluded_ips", methods=["GET"])
+def get_excluded_ips():
+    """Get list of excluded IPs (admin only)"""
+    if not session.get("admin"):
+        return jsonify({"error": "Unauthorized"}), 401
+    return jsonify({"excluded_ips": list(excluded_ips)}), 200
+
+@app.route("/add_excluded_ip", methods=["POST"])
+def add_excluded_ip():
+    """Add IP to exclusion list (admin only)"""
+    if not session.get("admin"):
+        return jsonify({"error": "Unauthorized"}), 401
+    
+    data = request.get_json()
+    ip = data.get('ip', '').strip()
+    
+    if not ip:
+        return jsonify({"error": "IP address is required"}), 400
+    
+    excluded_ips.add(ip)
+    save_excluded_ips()
+    
+    # If IP is currently blocked, unblock it
+    with lock:
+        if ip in blocked:
+            info = blocked[ip]
+            expired_block = {
+                "ip": ip,
+                "penalty": info.get("penalty", 0),
+                "blocks": info.get("blocks", 1),
+                "reason": info.get("last_reason", "N/A") + " (Added to exclusion list)",
+                "expired_at": datetime.now(UTC).isoformat(),
+                "last_block_time": info.get("last_block_time", "")
+            }
+            expired_blocks.insert(0, expired_block)
+            blocked.pop(ip, None)
+            req_log.pop(ip, None)
+            resp_log.pop(ip, None)
+    
+    save_blocked()
+    return jsonify({"message": f"IP {ip} added to exclusion list"}), 200
+
+@app.route("/remove_excluded_ip", methods=["POST"])
+def remove_excluded_ip():
+    """Remove IP from exclusion list (admin only)"""
+    if not session.get("admin"):
+        return jsonify({"error": "Unauthorized"}), 401
+    
+    data = request.get_json()
+    ip = data.get('ip', '').strip()
+    
+    if not ip:
+        return jsonify({"error": "IP address is required"}), 400
+    
+    if ip in excluded_ips:
+        excluded_ips.remove(ip)
+        save_excluded_ips()
+        return jsonify({"message": f"IP {ip} removed from exclusion list"}), 200
+    else:
+        return jsonify({"error": "IP not found in exclusion list"}), 404
 
 @app.route("/admin/change-password", methods=["GET", "POST"])
 def admin_change_password():
@@ -1827,10 +1937,12 @@ def status():
         "blocked": blocked_view,
         "reqCounts": req_counts,
         "respCounts": resp_counts,
+        "excluded_ips": list(excluded_ips),
         "stats": {
             "active_count": len(blocked_view),
             "total_today": today_blocks_count,
-            "expired_count": len(expired_blocks)
+            "expired_count": len(expired_blocks),
+            "excluded_count": len(excluded_ips)
         }
     })
     return jsonify(summary), 200

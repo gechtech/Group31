@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Excluded IPs Management</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+        .header {
+            background: #2c3e50;
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        .content {
+            padding: 20px;
+        }
+        .add-form {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        .btn {
+            background: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+        .btn:hover {
+            background: #0056b3;
+        }
+        .btn-danger {
+            background: #dc3545;
+        }
+        .btn-danger:hover {
+            background: #c82333;
+        }
+        .btn-secondary {
+            background: #6c757d;
+        }
+        .btn-secondary:hover {
+            background: #545b62;
+        }
+        .excluded-list {
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+        .excluded-item {
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .excluded-item:last-child {
+            border-bottom: none;
+        }
+        .ip-address {
+            font-family: monospace;
+            font-size: 16px;
+            font-weight: bold;
+        }
+        .message {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+        }
+        .success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        .stat-card {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        .stat-number {
+            font-size: 2em;
+            font-weight: bold;
+            color: #007bff;
+        }
+        .stat-label {
+            color: #6c757d;
+            margin-top: 5px;
+        }
+        .navigation {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🛡️ Excluded IPs Management</h1>
+            <p>Manage IPs that should never be blocked by the firewall</p>
+        </div>
+        
+        <div class="content">
+            <div class="navigation">
+                <button class="btn btn-secondary" onclick="window.location.href='/admin/home'">← Back to Admin</button>
+                <button class="btn btn-secondary" onclick="window.location.href='/admin/dashboard'">View Blocked IPs</button>
+            </div>
+
+            <div class="stats" id="stats">
+                <!-- Stats will be loaded here -->
+            </div>
+
+            <div class="add-form">
+                <h3>Add IP to Exclusion List</h3>
+                <div class="form-group">
+                    <label for="ipAddress">IP Address:</label>
+                    <input type="text" id="ipAddress" placeholder="e.g., 192.168.1.100 or 127.0.0.1" />
+                </div>
+                <button class="btn" onclick="addExcludedIP()">Add IP</button>
+            </div>
+
+            <div id="message"></div>
+
+            <div class="excluded-list">
+                <div style="padding: 15px; background: #f8f9fa; font-weight: bold; border-bottom: 2px solid #dee2e6;">
+                    Excluded IP Addresses
+                </div>
+                <div id="excludedList">
+                    <!-- Excluded IPs will be loaded here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function showMessage(text, type = 'success') {
+            const messageDiv = document.getElementById('message');
+            messageDiv.innerHTML = `<div class="message ${type}">${text}</div>`;
+            setTimeout(() => {
+                messageDiv.innerHTML = '';
+            }, 5000);
+        }
+
+        function loadStats() {
+            fetch('/status')
+                .then(response => response.json())
+                .then(data => {
+                    const stats = data.stats || {};
+                    document.getElementById('stats').innerHTML = `
+                        <div class="stat-card">
+                            <div class="stat-number">${stats.excluded_count || 0}</div>
+                            <div class="stat-label">Excluded IPs</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number">${stats.active_count || 0}</div>
+                            <div class="stat-label">Currently Blocked</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number">${stats.total_today || 0}</div>
+                            <div class="stat-label">Blocks Today</div>
+                        </div>
+                    `;
+                })
+                .catch(error => {
+                    console.error('Error loading stats:', error);
+                });
+        }
+
+        function loadExcludedIPs() {
+            fetch('/excluded_ips')
+                .then(response => response.json())
+                .then(data => {
+                    const excludedList = document.getElementById('excludedList');
+                    if (data.excluded_ips && data.excluded_ips.length > 0) {
+                        excludedList.innerHTML = data.excluded_ips.map(ip => `
+                            <div class="excluded-item">
+                                <span class="ip-address">${ip}</span>
+                                <button class="btn btn-danger" onclick="removeExcludedIP('${ip}')">Remove</button>
+                            </div>
+                        `).join('');
+                    } else {
+                        excludedList.innerHTML = '<div class="excluded-item">No excluded IPs configured</div>';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading excluded IPs:', error);
+                    showMessage('Error loading excluded IPs', 'error');
+                });
+        }
+
+        function addExcludedIP() {
+            const ip = document.getElementById('ipAddress').value.trim();
+            if (!ip) {
+                showMessage('Please enter an IP address', 'error');
+                return;
+            }
+
+            fetch('/add_excluded_ip', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ ip: ip })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    showMessage(data.error, 'error');
+                } else {
+                    showMessage(data.message, 'success');
+                    document.getElementById('ipAddress').value = '';
+                    loadExcludedIPs();
+                    loadStats();
+                }
+            })
+            .catch(error => {
+                console.error('Error adding excluded IP:', error);
+                showMessage('Error adding excluded IP', 'error');
+            });
+        }
+
+        function removeExcludedIP(ip) {
+            if (!confirm(`Are you sure you want to remove ${ip} from the exclusion list?`)) {
+                return;
+            }
+
+            fetch('/remove_excluded_ip', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ ip: ip })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    showMessage(data.error, 'error');
+                } else {
+                    showMessage(data.message, 'success');
+                    loadExcludedIPs();
+                    loadStats();
+                }
+            })
+            .catch(error => {
+                console.error('Error removing excluded IP:', error);
+                showMessage('Error removing excluded IP', 'error');
+            });
+        }
+
+        // Allow Enter key to add IP
+        document.getElementById('ipAddress').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                addExcludedIP();
+            }
+        });
+
+        // Load data when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            loadExcludedIPs();
+            loadStats();
+        });
+
+        // Auto-refresh every 30 seconds
+        setInterval(() => {
+            loadExcludedIPs();
+            loadStats();
+        }, 30000);
+    </script>
+</body>
+</html>

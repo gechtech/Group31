@@ -1,7 +1,63 @@
 {
   "active": {},
-  "history": {},
+  "history": {
+    "192.168.88.5": {
+      "attempts": 2,
+      "records": [
+        {
+          "until": "2025-09-29T10:50:49.218031+00:00",
+          "penalty": 20,
+          "blocks": 1,
+          "last_reason": "Flooding: 15 GETs in 15s",
+          "last_block_time": "2025-09-29T10:50:29.218038+00:00"
+        },
+        {
+          "until": "2025-09-29T10:51:01.881621+00:00",
+          "penalty": 20,
+          "blocks": 1,
+          "last_reason": "Flooding: 15 GETs in 15s",
+          "last_block_time": "2025-09-29T10:50:41.881627+00:00"
+        }
+      ]
+    },
+    "192.168.88.10": {
+      "attempts": 1,
+      "records": [
+        {
+          "until": "2025-09-29T10:54:44.192679+00:00",
+          "penalty": 20,
+          "blocks": 1,
+          "last_reason": "Flooding: 15 GETs in 15s",
+          "last_block_time": "2025-09-29T10:54:24.192685+00:00"
+        }
+      ]
+    }
+  },
   "expired": [
+    {
+      "ip": "192.168.88.10",
+      "penalty": 20,
+      "blocks": 1,
+      "reason": "Flooding: 15 GETs in 15s",
+      "expired_at": "2025-09-29T10:54:44.534313+00:00",
+      "last_block_time": "2025-09-29T10:54:24.192685+00:00"
+    },
+    {
+      "ip": "192.168.88.5",
+      "penalty": 20,
+      "blocks": 1,
+      "reason": "Flooding: 15 GETs in 15s (Unblocked by admin)",
+      "expired_at": "2025-09-29T10:50:52.314792+00:00",
+      "last_block_time": "2025-09-29T10:50:41.881627+00:00"
+    },
+    {
+      "ip": "192.168.88.5",
+      "penalty": 20,
+      "blocks": 1,
+      "reason": "Flooding: 15 GETs in 15s (Unblocked by admin)",
+      "expired_at": "2025-09-29T10:50:41.714680+00:00",
+      "last_block_time": "2025-09-29T10:50:29.218038+00:00"
+    },
     {
       "ip": "127.0.0.1",
       "penalty": 20,
@@ -35,6 +91,6 @@
       "last_block_time": "2025-09-28T13:11:48.513437"
     }
   ],
-  "today_count": 0,
+  "today_count": 3,
   "last_reset": "2025-09-29"
 }
