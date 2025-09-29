@@ -1,38 +1,6 @@
 {
   "active": {},
-  "history": {
-    "192.168.88.7": {
-      "attempts": 2,
-      "records": [
-        {
-          "until": "2025-09-28T13:13:30.457854",
-          "penalty": 20,
-          "blocks": 1,
-          "last_reason": "Flooding: 5 GETs in 9s",
-          "last_block_time": "2025-09-28T13:13:10.458408"
-        },
-        {
-          "until": "2025-09-28T13:14:07.136507",
-          "penalty": 20,
-          "blocks": 1,
-          "last_reason": "Flooding: 5 GETs in 9s",
-          "last_block_time": "2025-09-28T13:13:47.136523"
-        }
-      ]
-    },
-    "127.0.0.1": {
-      "attempts": 1,
-      "records": [
-        {
-          "until": "2025-09-28T13:14:24.986926",
-          "penalty": 20,
-          "blocks": 1,
-          "last_reason": "Brute-force: 5 POSTs in 9s",
-          "last_block_time": "2025-09-28T13:14:04.986938"
-        }
-      ]
-    }
-  },
+  "history": {},
   "expired": [
     {
       "ip": "127.0.0.1",
@@ -67,6 +35,6 @@
       "last_block_time": "2025-09-28T13:11:48.513437"
     }
   ],
-  "today_count": 4,
-  "last_reset": "2025-09-28"
+  "today_count": 0,
+  "last_reset": "2025-09-29"
 }
