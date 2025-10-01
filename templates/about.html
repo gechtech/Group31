@@ -19,7 +19,12 @@
     .card{background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:24px;box-shadow:0 1px 3px rgba(0,0,0,.1)}
     .card h3{margin:0 0 16px;font-size:18px;font-weight:600;color:#1e293b}
     .avatar-section{text-align:center}
-    .avatar{width:120px;height:120px;border-radius:50%;object-fit:cover;border:4px solid #e2e8f0;margin-bottom:16px}
+    .avatar-container{position:relative;display:inline-block;margin-bottom:16px}
+    .avatar{width:120px;height:120px;border-radius:50%;object-fit:cover;border:4px solid #e2e8f0;cursor:pointer;transition:all .3s}
+    .avatar-overlay{position:absolute;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.7);border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;opacity:0;transition:opacity .3s;cursor:pointer;font-size:12px;font-weight:500}
+    .avatar-container:hover .avatar-overlay{opacity:1}
+    .avatar-container:hover .avatar{transform:scale(1.05)}
+    .avatar-overlay svg{margin-bottom:4px}
     .upload-btn{background:#3b82f6;color:#fff;border:none;padding:10px 20px;border-radius:8px;cursor:pointer;font-weight:500;transition:background .2s}
     .upload-btn:hover{background:#2563eb}
     .settings-section{display:flex;flex-direction:column;gap:24px}
@@ -61,11 +66,17 @@
         <!-- Avatar Section -->
         <div class="card avatar-section">
           <h3>Profile Picture</h3>
-          <img id="avatar" class="avatar" src="{{ '/static/' + (user.profile_image or 'assets/add_profile.jpg') }}" alt="Profile Picture">
-          <form id="imgForm" enctype="multipart/form-data">
-            <input type="file" name="image" accept="image/*" required style="margin-bottom:12px">
-            <button class="upload-btn" type="submit">Upload Picture</button>
-          </form>
+          <div class="avatar-container">
+            <img id="avatar" class="avatar" src="{{ '/static/' + (user.profile_image or 'assets/add_profile.jpg') }}" alt="Profile Picture">
+            <div class="avatar-overlay">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+                <circle cx="12" cy="13" r="4"/>
+              </svg>
+              <span>Change Photo</span>
+            </div>
+          </div>
+          <input type="file" id="fileInput" name="image" accept="image/*" style="display:none">
           <div id="imgMsg" class="message"></div>
         </div>
 
@@ -136,16 +147,53 @@
       const json = ct.includes('application/json') ? await res.json() : null;
       return {ok:res.ok, status:res.status, json};
     }
-    $('#imgForm').addEventListener('submit', async (e)=>{
-      e.preventDefault();
-      const r = await postForm('/api/profile/image', e.target);
-      $('#imgMsg').textContent = r.ok ? 'Updated' : (r.json?.error || 'Failed');
-      if(r.ok && r.json?.profile_image){ $('#avatar').src = r.json.profile_image; }
+    // Avatar upload functionality
+    const avatarContainer = $('.avatar-container');
+    const fileInput = $('#fileInput');
+    
+    avatarContainer.addEventListener('click', () => {
+      fileInput.click();
+    });
+    
+    fileInput.addEventListener('change', async (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      
+      const formData = new FormData();
+      formData.append('image', file);
+      
+      try {
+        const res = await fetch('/api/profile/image', {
+          method: 'POST',
+          body: formData,
+          credentials: 'include'
+        });
+        
+        const result = await res.json();
+        
+        if (res.ok) {
+          $('#imgMsg').textContent = 'Profile picture updated successfully!';
+          $('#imgMsg').style.color = '#059669';
+          if (result.profile_image) {
+            $('#avatar').src = result.profile_image;
+          }
+        } else {
+          $('#imgMsg').textContent = result.error || 'Failed to update profile picture';
+          $('#imgMsg').style.color = '#dc2626';
+        }
+      } catch (error) {
+        $('#imgMsg').textContent = 'Error uploading image';
+        $('#imgMsg').style.color = '#dc2626';
+      }
+      
+      // Reset file input
+      fileInput.value = '';
     });
     $('#userForm').addEventListener('submit', async (e)=>{
       e.preventDefault();
       const r = await postForm('/api/profile/username', e.target);
-      $('#userMsg').textContent = r.ok ? 'Updated' : (r.json?.error || 'Failed');
+      $('#userMsg').textContent = r.ok ? 'Username updated successfully!' : (r.json?.error || 'Failed to update username');
+      $('#userMsg').style.color = r.ok ? '#059669' : '#dc2626';
     });
     $('#pwdForm').addEventListener('submit', async (e)=>{
       e.preventDefault();

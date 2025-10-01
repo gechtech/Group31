@@ -61,6 +61,8 @@
     .badge { padding: 0.25rem 0.75rem; background: var(--border); border-radius: 12px; font-size: 0.75rem; }
     .badge.admin { background: #fef3c7; color: #d97706; }
     .badge.user { background: #dbeafe; color: var(--primary); }
+    .profile-img { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 2px solid var(--border); }
+    .user-info { display: flex; align-items: center; gap: 12px; }
     .hidden { display: none; }
     @media (min-width: 1024px) { .hamburger { display: none; } .sidebar { left: 0; } .header { margin-left: 280px; } .main-content { margin-left: 280px; } .overlay { display: none; } }
   </style>
@@ -100,6 +102,7 @@
             <thead>
               <tr>
                 <th>ID</th>
+                <th>Profile</th>
                 <th>Username</th>
                 <th>Email</th>
                 <th>Deleted Reason</th>
@@ -182,15 +185,23 @@
           emptyState.classList.remove('hidden');
         } else {
           emptyState.classList.add('hidden');
-          tbody.innerHTML = deletedUsers.map(user => `
+          tbody.innerHTML = deletedUsers.map(user => {
+            const profileImg = user.profile_image ? `/static/${user.profile_image}` : '/static/assets/add_profile.jpg';
+            return `
             <tr>
               <td>${user.id || 'N/A'}</td>
+              <td>
+                <div class="user-info">
+                  <img src="${profileImg}" alt="Profile" class="profile-img" onerror="this.src='/static/assets/add_profile.jpg'">
+                </div>
+              </td>
               <td>${user.username || 'N/A'}</td>
               <td>${user.email || 'N/A'}</td>
               <td><span class="badge ${user.deleted_reason === 'admin_action' ? 'admin' : 'user'}">${user.deleted_reason || 'unknown'}</span></td>
               <td>${user.deleted_at ? new Date(user.deleted_at).toLocaleString() : 'N/A'}</td>
             </tr>
-          `).join('');
+            `;
+          }).join('');
         }
       } catch (error) {
         console.error('Error loading deleted users:', error);
