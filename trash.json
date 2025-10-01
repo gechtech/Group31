@@ -14,5 +14,13 @@
     "profile_image": "",
     "deleted_at": "2025-09-28T12:47:38.446742",
     "deleted_reason": "user_self_delete"
+  },
+  {
+    "id": 1,
+    "username": "amir",
+    "email": "amir@gmail.com",
+    "profile_image": "assets/profile_images/user_1_1759291415.jpg",
+    "deleted_at": "2025-10-01T04:04:03.005770+00:00",
+    "deleted_reason": "user_self_delete"
   }
 ]
