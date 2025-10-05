@@ -79,8 +79,8 @@ WAF: Custom Python middleware for rate limiting & attack detection
 🚀 Getting Started
 1. Clone the Repository
 ```bash
-git clone https://github.com/Animhassen/phishing-detector.git
-cd phishing-detector
+git clone https://github.com/gechtech/Group31.git
+cd Group31
 ```
 
 3. Install Dependencies
