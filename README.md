@@ -94,6 +94,7 @@ Create a .env file in the root directory:
 
 ```bash
 GROQ_API_KEY=your_groq_api_key
+VIRUSTOTAL_API_KEY=your_virus-total_api_key
 ```
 
 4. Run the Server
