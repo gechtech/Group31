@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WAF - Temporarily Blocked</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: #f5f5f5;
+            margin: 0;
+            padding: 15px;
+            overflow-x: hidden;
+        }
+        .container {
+            background-color: #fff;
+            padding: 30px 20px;
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            width: 100%;
+            max-width: 500px;
+            word-wrap: break-word;
+        }
+        h1 {
+            color: #e74c3c;
+            font-size: 1.8em;
+            margin-bottom: 20px;
+            word-wrap: break-word;
+        }
+        p {
+            color: #666;
+            font-size: 1em;
+            line-height: 1.5;
+            margin: 15px 0;
+            word-wrap: break-word;
+        }
+        #countdown {
+            font-size: 3.5em;
+            font-weight: bold;
+            color: #e74c3c;
+            margin: 25px 0;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .waf-note {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #e74c3c;
+            margin-top: 25px;
+            font-size: 0.9em;
+            color: #555;
+            word-wrap: break-word;
+        }
+        
+        @media (max-width: 480px) {
+            body {
+                padding: 10px;
+            }
+            .container {
+                padding: 20px 15px;
+            }
+            h1 {
+                font-size: 1.5em;
+            }
+            p {
+                font-size: 0.95em;
+            }
+            #countdown {
+                font-size: 2.8em;
+                margin: 20px 0;
+            }
+            .waf-note {
+                padding: 12px;
+                font-size: 0.85em;
+            }
+        }
+        
+        @media (max-width: 320px) {
+            .container {
+                padding: 15px 10px;
+            }
+            h1 {
+                font-size: 1.3em;
+            }
+            #countdown {
+                font-size: 2.5em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>⚠️ Access Temporarily Blocked</h1>
+        <p>You have been temporarily blocked due to too many requests.</p>
+        <p>Please wait for the countdown to complete:</p>
+        <div id="countdown">{{ time_remaining }}</div>
+        <p>seconds remaining</p>
+        <div class="waf-note">
+            🛡️ This block is part of our Web Application Firewall (WAF) protection system.
+        </div>
+
+        <script>
+            let timeRemaining = {{ time_remaining }};
+            const countdownElement = document.getElementById('countdown');
+
+            async function updateCountdownFromServer() {
+                try {
+                    const response = await fetch('/remaining_time');
+                    const data = await response.json();
+                    timeRemaining = Math.max(0, data.remaining);
+                } catch (error) {
+                    // Fallback to client-side countdown if server unreachable
+                    timeRemaining = Math.max(0, timeRemaining - 1);
+                }
+            }
+
+            async function updateCountdown() {
+                await updateCountdownFromServer();
+                countdownElement.textContent = timeRemaining;
+                if (timeRemaining <= 0) {
+                    window.location.reload();
+                } else {
+                    setTimeout(updateCountdown, 1000);
+                }
+            }
+
+            updateCountdown();
+        </script>
+    </div>
+</body>
+</html>

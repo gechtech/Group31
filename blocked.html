@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Blocked IPs Management</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        :root {
+            --bg: #f8f9fa;
+            --card-bg: #ffffff;
+            --text: #212529;
+            --text-muted: #6c757d;
+            --border: #dee2e6;
+            --shadow: rgba(0,0,0,0.1);
+        }
+        
+        [data-theme="dark"] {
+            --bg: #1e1e2f;
+            --card-bg: #2a2a3e;
+            --text: #ffffff;
+            --text-muted: #a1a1aa;
+            --border: #3f3f46;
+            --shadow: rgba(0,0,0,0.3);
+        }
+        
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; 
+            background: var(--bg);
+            color: var(--text);
+            transition: all 0.3s ease;
+        }
+        
+        .container { max-width: 1200px; margin: 2rem auto; padding: 0 1rem; }
+        .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
+        .stat-card { background: var(--card-bg); padding: 1.5rem; border-radius: 8px; box-shadow: 0 2px 4px var(--shadow); }
+        .stat-number { font-size: 2rem; font-weight: bold; color: #dc3545; }
+        .stat-label { color: var(--text-muted); margin-top: 0.5rem; }
+        
+        .controls { background: var(--card-bg); padding: 1.5rem; border-radius: 8px; box-shadow: 0 2px 4px var(--shadow); margin-bottom: 2rem; }
+        .controls h3 { margin-bottom: 1rem; }
+        .btn-group { display: flex; gap: 1rem; flex-wrap: wrap; }
+        .btn { padding: 0.75rem 1.5rem; border: none; border-radius: 6px; cursor: pointer; font-weight: 500; transition: all 0.2s; }
+        .btn-primary { background: #007bff; color: white; }
+        .btn-success { background: #28a745; color: white; }
+        .btn-warning { background: #ffc107; color: #212529; }
+        .btn-danger { background: #dc3545; color: white; }
+        .btn-secondary { background: #6c757d; color: white; }
+        .btn:hover { transform: translateY(-1px); box-shadow: 0 4px 8px rgba(0,0,0,0.2); }
+        
+        .table-container { background: var(--card-bg); border-radius: 8px; box-shadow: 0 2px 4px var(--shadow); overflow: hidden; }
+        .table-scroll { overflow-x: auto; }
+        .table-header { padding: 1.5rem; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+        .table-header h3 { margin: 0; }
+        
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 1rem; text-align: left; border-bottom: 1px solid var(--border); color: var(--text); }
+        th { background: var(--bg); font-weight: 600; }
+        tr:hover { background: var(--bg); }
+        
+        .tag { padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.75rem; font-weight: 600; }
+        .tag.active { background: #dc3545; color: white; }
+        .tag.brute-force { background: #e74c3c; color: white; }
+        .tag.ddos { background: #8e44ad; color: white; }
+        .tag.flooding { background: #f39c12; color: white; }
+        .tag.other { background: #95a5a6; color: white; }
+        
+        .countdown { font-weight: bold; color: #dc3545; }
+        .muted { color: var(--text-muted); }
+        
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; }
+        .modal-content { background: var(--card-bg); margin: 10% auto; padding: 2rem; border-radius: 8px; max-width: 500px; }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
+        .close { font-size: 1.5rem; cursor: pointer; color: var(--text); }
+        
+        @media (max-width: 768px) {
+            .container { margin: 1rem auto; }
+            .btn-group { flex-direction: column; }
+            table { font-size: 0.875rem; min-width: 800px; }
+            th, td { padding: 0.5rem; white-space: nowrap; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Statistics -->
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-number" id="activeCount">0</div>
+                <div class="stat-label">Active Blocks</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="totalBlocks">0</div>
+                <div class="stat-label">Total Blocks Today</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="expiredCount">0</div>
+                <div class="stat-label">Expired Blocks</div>
+            </div>
+        </div>
+
+        <!-- Controls -->
+        <div class="controls">
+            <h3>🔧 Management Controls</h3>
+            <div class="btn-group">
+                <button class="btn btn-primary" onclick="refreshData()">🔄 Refresh Data</button>
+                <button class="btn btn-success" onclick="exportData()">📊 Export CSV</button>
+                <button class="btn btn-warning" onclick="clearExpired()">🧹 Clear Expired</button>
+                <button class="btn btn-danger" onclick="unblockAll()">🚫 Unblock All</button>
+                <button class="btn btn-secondary" onclick="showAddIP()">➕ Block IP</button>
+            </div>
+        </div>
+
+        <!-- Active Blocked IPs -->
+        <div class="table-container">
+            <div class="table-header">
+                <h3>🚨 Currently Blocked IPs</h3>
+                <span class="muted">Auto-refreshes every 5 seconds</span>
+            </div>
+            <div class="table-scroll">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>IP Address</th>
+                            <th>Penalty (min)</th>
+                            <th>Remaining</th>
+                            <th>Block Count</th>
+                            <th>Reason</th>
+                            <th>Category</th>
+                            <th>Status</th>
+                            <th>Last Block</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="activeTable">
+                        <tr><td colspan="9" class="muted" style="text-align:center;">Loading...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Previous/Expired IPs -->
+        <div class="table-container" style="margin-top: 2rem;">
+            <div class="table-header">
+                <h3>📋 Recently Expired Blocks</h3>
+                <button class="btn btn-secondary" onclick="clearHistory()">Clear History</button>
+            </div>
+            <div class="table-scroll">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>IP Address</th>
+                            <th>Penalty (min)</th>
+                            <th>Block Count</th>
+                            <th>Reason</th>
+                            <th>Expired At</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="expiredTable">
+                        <tr><td colspan="6" class="muted" style="text-align:center;">No expired blocks</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add IP Modal -->
+    <div id="addIPModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Block New IP Address</h3>
+                <span class="close" onclick="closeModal()">&times;</span>
+            </div>
+            <form onsubmit="blockNewIP(event)">
+                <div style="margin-bottom: 1rem;">
+                    <label>IP Address:</label>
+                    <input type="text" id="newIP" placeholder="192.168.1.1" required style="width: 100%; padding: 0.5rem; margin-top: 0.5rem; border: 1px solid var(--border); border-radius: 4px; background: var(--card-bg); color: var(--text);">
+                </div>
+                <div style="margin-bottom: 1rem;">
+                    <label style="color: var(--text);">Penalty (minutes):</label>
+                    <input type="number" id="newPenalty" value="60" min="1" required style="width: 100%; padding: 0.5rem; margin-top: 0.5rem; border: 1px solid var(--border); border-radius: 4px; background: var(--card-bg); color: var(--text);">
+                </div>
+                <div style="margin-bottom: 1rem;">
+                    <label style="color: var(--text);">Reason:</label>
+                    <input type="text" id="newReason" placeholder="Manual block" required style="width: 100%; padding: 0.5rem; margin-top: 0.5rem; border: 1px solid var(--border); border-radius: 4px; background: var(--card-bg); color: var(--text);">
+                </div>
+                <div style="display: flex; gap: 1rem;">
+                    <button type="submit" class="btn btn-danger">Block IP</button>
+                    <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        let activeIPs = {};
+        let expiredIPs = [];
+        let updateInterval;
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function categorizeReason(reason) {
+            const r = (reason || '').toLowerCase();
+            if (r.includes('brut') || r.includes('password') || r.includes('login')) return 'brute-force';
+            if (r.includes('ddos')) return 'ddos';
+            if (r.includes('dos') || r.includes('flood') || r.includes('rate')) return 'flooding';
+            return 'other';
+        }
+
+        function shortReasonTag(reason) {
+            const r = (reason || '').toLowerCase();
+            if (r.includes('brut')) return 'BRUTE';
+            if (r.includes('ddos')) return 'DDOS';
+            if (r.includes('flood')) return 'FLOOD';
+            return 'OTHER';
+        }
+
+        async function loadData() {
+            try {
+                const response = await fetch('/blocked_ips.json');
+                const data = await response.json();
+                
+                activeIPs = data.active || {};
+                expiredIPs = data.expired || [];
+                
+                const stats = data.stats || {
+                    active_count: Object.keys(activeIPs).length,
+                    total_today: 0,
+                    expired_count: expiredIPs.length
+                };
+                
+                updateStats(stats.active_count, stats.total_today, stats.expired_count);
+                renderActiveTable();
+                renderExpiredTable();
+                
+            } catch (error) {
+                console.error('Failed to load data:', error);
+                document.getElementById('activeTable').innerHTML = 
+                    '<tr><td colspan="9" style="text-align:center;color:#dc3545;">Error loading data</td></tr>';
+            }
+        }
+
+        function updateStats(active, total, expired) {
+            document.getElementById('activeCount').textContent = active;
+            document.getElementById('totalBlocks').textContent = total;
+            document.getElementById('expiredCount').textContent = expired;
+        }
+
+        function renderActiveTable() {
+            const tbody = document.getElementById('activeTable');
+            tbody.innerHTML = '';
+            
+            // Stop all existing countdowns
+            stopAllCountdowns();
+            
+            const ips = Object.keys(activeIPs);
+            if (ips.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="9" class="muted" style="text-align:center;">No blocked IPs</td></tr>';
+                return;
+            }
+            
+            ips.sort((a, b) => (activeIPs[b].remaining || 0) - (activeIPs[a].remaining || 0));
+            
+            for (const ip of ips) {
+                const info = activeIPs[ip];
+                const remaining = Math.max(0, parseInt(info.remaining || 0));
+                const category = categorizeReason(info.last_reason);
+                const tag = shortReasonTag(info.last_reason);
+                const lastBlock = info.last_block_time ? new Date(info.last_block_time).toLocaleString() : 'N/A';
+                
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td><strong>${ip}</strong></td>
+                    <td>${info.penalty || '-'}</td>
+                    <td><span class="countdown" id="remaining-${ip.replace(/\./g, '-')}">${remaining}s</span></td>
+                    <td>${info.blocks || 0}</td>
+                    <td>${escapeHtml(info.last_reason || 'N/A')}</td>
+                    <td><span class="tag ${category}">${tag}</span></td>
+                    <td><span class="tag active">ACTIVE</span></td>
+                    <td>${lastBlock}</td>
+                    <td>
+                        <button class="btn btn-danger" style="padding:4px 8px;font-size:12px;" onclick="unblockIP('${ip}')">Unblock</button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+                
+                // Start countdown for this IP
+                if (remaining > 0) {
+                    setTimeout(() => startCountdown(ip, remaining), 100);
+                }
+            }
+        }
+
+        function renderExpiredTable() {
+            const tbody = document.getElementById('expiredTable');
+            tbody.innerHTML = '';
+            
+            if (expiredIPs.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" class="muted" style="text-align:center;">No expired blocks</td></tr>';
+                return;
+            }
+            
+            for (const info of expiredIPs.slice(0, 20)) {
+                const expiredAt = info.expired_at ? new Date(info.expired_at).toLocaleString() : 'N/A';
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${info.ip}</td>
+                    <td>${info.penalty || '-'}</td>
+                    <td>${info.blocks || 0}</td>
+                    <td>${escapeHtml(info.reason || 'N/A')}</td>
+                    <td>${expiredAt}</td>
+                    <td>
+                        <button class="btn btn-warning" style="padding:4px 8px;font-size:12px;" onclick="reblockIP('${info.ip}')">Re-block</button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            }
+        }
+
+        async function unblockIP(ip) {
+            if (!confirm(`Unblock ${ip}?`)) return;
+            try {
+                const response = await fetch(`/unblock/${ip}`, { method: 'POST' });
+                if (response.ok) loadData();
+                else alert('Failed to unblock IP');
+            } catch (error) {
+                alert('Error unblocking IP');
+            }
+        }
+
+        async function unblockAll() {
+            if (!confirm('Unblock ALL IPs?')) return;
+            try {
+                const response = await fetch('/unblock_all', { method: 'POST' });
+                if (response.ok) loadData();
+                else alert('Failed to unblock all IPs');
+            } catch (error) {
+                alert('Error unblocking IPs');
+            }
+        }
+
+        async function clearExpired() {
+            if (!confirm('Clear expired blocks?')) return;
+            try {
+                const response = await fetch('/clear_expired', { method: 'POST' });
+                if (response.ok) loadData();
+                else alert('Failed to clear expired blocks');
+            } catch (error) {
+                alert('Error clearing expired blocks');
+            }
+        }
+
+        function clearHistory() { clearExpired(); }
+        function refreshData() { loadData(); }
+
+        async function exportData() {
+            try {
+                const response = await fetch('/export_blocked_data');
+                const result = await response.json();
+                if (!response.ok) { alert('Failed to export data'); return; }
+                const data = [['IP', 'Status', 'Penalty', 'Remaining', 'Blocks', 'Reason', 'Last Block']];
+                for (const item of result.data) {
+                    data.push([item.ip, item.status, item.penalty, item.remaining, item.blocks, item.reason, item.last_block_time]);
+                }
+                const csv = data.map(row => row.map(cell => `"${cell || ''}"`).join(',')).join('\n');
+                const blob = new Blob([csv], { type: 'text/csv' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `blocked-ips-${new Date().toISOString().split('T')[0]}.csv`;
+                a.click();
+                URL.revokeObjectURL(url);
+            } catch (error) {
+                alert('Error exporting data');
+            }
+        }
+
+        function showAddIP() { document.getElementById('addIPModal').style.display = 'block'; }
+        function closeModal() { document.getElementById('addIPModal').style.display = 'none'; }
+
+        async function blockNewIP(event) {
+            event.preventDefault();
+            const ip = document.getElementById('newIP').value;
+            const penalty = document.getElementById('newPenalty').value;
+            const reason = document.getElementById('newReason').value;
+            try {
+                const response = await fetch('/block_ip', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ ip, penalty: parseInt(penalty), reason })
+                });
+                if (response.ok) { closeModal(); loadData(); }
+                else alert('Failed to block IP');
+            } catch (error) {
+                alert('Error blocking IP');
+            }
+        }
+
+        async function reblockIP(ip) {
+            if (!confirm(`Re-block ${ip}?`)) return;
+            try {
+                const response = await fetch('/block_ip', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ ip, penalty: 60, reason: 'Manual re-block' })
+                });
+                if (response.ok) loadData();
+                else alert('Failed to re-block IP');
+            } catch (error) {
+                alert('Error re-blocking IP');
+            }
+        }
+
+        let countdownTimers = {};
+        
+        async function updateCountdownFromServer(ip) {
+            try {
+                const response = await fetch(`/remaining_time/${ip}`);
+                const data = await response.json();
+                const elementId = `remaining-${ip.replace(/\./g, '-')}`;
+                const element = document.getElementById(elementId);
+                if (element) {
+                    const timeRemaining = Math.max(0, data.remaining);
+                    element.textContent = `${timeRemaining}s`;
+                    if (timeRemaining <= 0) {
+                        element.style.color = '#28a745';
+                        clearInterval(countdownTimers[ip]);
+                        delete countdownTimers[ip];
+                        setTimeout(loadData, 1000);
+                    }
+                }
+            } catch (error) {
+                // Fallback: get from main data endpoint
+                try {
+                    const response = await fetch('/blocked_ips.json');
+                    const data = await response.json();
+                    const info = data.active[ip];
+                    if (info) {
+                        const elementId = `remaining-${ip.replace(/\./g, '-')}`;
+                        const element = document.getElementById(elementId);
+                        if (element) {
+                            const timeRemaining = Math.max(0, parseInt(info.remaining || 0));
+                            element.textContent = `${timeRemaining}s`;
+                            if (timeRemaining <= 0) {
+                                element.style.color = '#28a745';
+                                clearInterval(countdownTimers[ip]);
+                                delete countdownTimers[ip];
+                                setTimeout(loadData, 1000);
+                            }
+                        }
+                    }
+                } catch (fallbackError) {
+                    // Server unreachable, keep existing display
+                }
+            }
+        }
+        
+        function startCountdown(ip, initialSeconds) {
+            const elementId = `remaining-${ip.replace(/\./g, '-')}`;
+            const element = document.getElementById(elementId);
+            if (!element) return;
+            
+            // Clear existing timer
+            if (countdownTimers[ip]) {
+                clearInterval(countdownTimers[ip]);
+            }
+            
+            let timeRemaining = initialSeconds;
+            element.textContent = `${timeRemaining}s`;
+            
+            // Update from server every second like the user blocked page
+            countdownTimers[ip] = setInterval(async () => {
+                await updateCountdownFromServer(ip);
+            }, 1000);
+        }
+        
+        function stopAllCountdowns() {
+            Object.values(countdownTimers).forEach(timer => clearInterval(timer));
+            countdownTimers = {};
+        }
+
+        function startAutoUpdate() {
+            loadData();
+            if (updateInterval) clearInterval(updateInterval);
+            updateInterval = setInterval(loadData, 5000);
+        }
+
+        startAutoUpdate();
+
+        // Theme functionality
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        document.documentElement.setAttribute('data-theme', savedTheme);
+
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden) {
+                clearInterval(updateInterval);
+            } else {
+                startAutoUpdate();
+            }
+        });
+
+        window.onclick = function(event) {
+            const addModal = document.getElementById('addIPModal');
+            if (event.target === addModal) {
+                closeModal();
+            }
+        }
+    </script>
+</body>
+</html>
