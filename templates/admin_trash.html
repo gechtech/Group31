@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin - Deleted Users</title>
+  <style>
+    * { box-sizing: border-box; }
+    :root {
+      --bg: #f8fafc; --card: #ffffff; --text: #1e293b; --text-muted: #64748b;
+      --border: #e2e8f0; --primary: #3b82f6; --danger: #dc2626; --shadow: rgba(0,0,0,0.1);
+    }
+    [data-theme="dark"] {
+      --bg: #1e1e2f; --card: #2a2a3e; --text: #ffffff; --text-muted: #a1a1aa;
+      --border: #3f3f46; --shadow: rgba(0,0,0,0.3);
+    }
+    body { font-family: Inter, sans-serif; background: var(--bg); color: var(--text); margin: 0; }
+    .header { background: var(--card); box-shadow: 0 2px 8px var(--shadow); padding: 1rem 1.5rem; display: flex; align-items: center; gap: 1rem; }
+    .hamburger { background: none; border: none; font-size: 1.5rem; cursor: pointer; padding: 0.5rem; border-radius: 8px; }
+    .hamburger:hover { background: var(--border); }
+    .sidebar { position: fixed; top: 0; left: -280px; width: 280px; height: 100vh; background: var(--card); box-shadow: 2px 0 10px var(--shadow); transition: left 0.3s; z-index: 200; display: flex; flex-direction: column; }
+    .theme-toggle { padding: 1rem 1.5rem; margin-top: auto; border-top: 1px solid var(--border); }
+    .toggle-switch { display: flex; align-items: center; gap: 0.75rem; cursor: pointer; }
+    .toggle-slider { width: 50px; height: 24px; background: var(--border); border-radius: 12px; position: relative; transition: background-color 0.3s; }
+    .toggle-slider::before { content: ''; position: absolute; top: 2px; left: 2px; width: 20px; height: 20px; background: white; border-radius: 50%; transition: transform 0.3s; }
+    .toggle-slider.active { background: var(--primary); }
+    .toggle-slider.active::before { transform: translateX(26px); }
+    .sidebar.open { left: 0; }
+    .table-wrapper {
+      width: 100%;
+      overflow-x: auto;    /* 👈 horizontal scroll */
+      -webkit-overflow-scrolling: touch; /* smooth scroll on iOS */
+    }
+
+    .table-wrapper table {
+      min-width: 600px; /* 👈 makes sure columns don’t shrink too much */
+    }
+
+    .sidebar-header { padding: 1.5rem; border-bottom: 1px solid var(--border); }
+    .nav-item { display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem 1.5rem; color: var(--text-muted); text-decoration: none; transition: all 0.2s; }
+    .nav-item:hover { background: var(--border); color: var(--text); }
+    .nav-item.active { background: rgba(59, 130, 246, 0.1); color: var(--primary); }
+    .nav-item.logout { color: var(--danger); }
+    .theme-toggle { padding: 1rem 1.5rem; margin-top: auto; border-top: 1px solid var(--border); }
+    .toggle-switch { display: flex; align-items: center; gap: 0.75rem; cursor: pointer; }
+    .toggle-slider { width: 50px; height: 24px; background: var(--border); border-radius: 12px; position: relative; transition: background-color 0.3s; }
+    .toggle-slider::before { content: ''; position: absolute; top: 2px; left: 2px; width: 20px; height: 20px; background: white; border-radius: 50%; transition: transform 0.3s; }
+    .toggle-slider.active { background: var(--primary); }
+    .toggle-slider.active::before { transform: translateX(26px); }
+    .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); opacity: 0; visibility: hidden; transition: all 0.3s; z-index: 150; }
+    .overlay.active { opacity: 1; visibility: visible; }
+    .main-content { padding: 1.5rem; transition: margin-left 0.3s; }
+    .container { max-width: 1200px; margin: 0 auto; }
+    .card { background: var(--card); border-radius: 12px; box-shadow: 0 1px 3px var(--shadow); overflow: hidden; }
+    .empty-state { text-align: center; padding: 3rem; color: var(--text-muted); }
+    .empty-icon { font-size: 3rem; margin-bottom: 1rem; }
+    table { width: 100%; border-collapse: collapse; }
+    th { background: var(--border); padding: 1rem; text-align: left; font-weight: 600; }
+    td { padding: 1rem; border-bottom: 1px solid var(--border); }
+    tr:hover { background: var(--border); }
+    .badge { padding: 0.25rem 0.75rem; background: var(--border); border-radius: 12px; font-size: 0.75rem; }
+    .badge.admin { background: #fef3c7; color: #d97706; }
+    .badge.user { background: #dbeafe; color: var(--primary); }
+    .profile-img { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 2px solid var(--border); }
+    .user-info { display: flex; align-items: center; gap: 12px; }
+    .hidden { display: none; }
+    @media (min-width: 1024px) { .hamburger { display: none; } .sidebar { left: 0; } .header { margin-left: 280px; } .main-content { margin-left: 280px; } .overlay { display: none; } }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <button class="hamburger" id="hamburger">☰</button>
+    <h1>🗑 Deleted Users</h1>
+  </header>
+  <nav class="sidebar" id="sidebar">
+    <div class="sidebar-header"><h2>Navigation</h2></div>
+    <div>
+      <a href="/admin/home" class="nav-item"><span>🏠</span> Admin Home</a>
+      <a href="/admin/users" class="nav-item"><span>👥</span> Users</a>
+      <a href="/admin/excluded-ips" class="nav-item"><span>🛡️</span> Excluded IPs</a>
+      <a href="/admin/trash" class="nav-item active"><span>🗑️</span> Trash</a>
+      <a href="/admin/change-password" class="nav-item"><span>🔑</span> Change Password</a>
+      <a href="/admin/logout" class="nav-item logout"><span>🚪</span> Logout</a>
+    </div>
+    <div class="theme-toggle">
+      <div class="toggle-switch" id="themeToggle">
+        <span id="themeIcon">🌙</span>
+        <div class="toggle-slider" id="toggleSlider"></div>
+        <span>Night Mode</span>
+      </div>
+    </div>
+  </nav>
+  
+  <div class="overlay" id="overlay"></div>
+  
+  <div class="main-content">
+    <div class="container">
+
+      <div class="card">
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Profile</th>
+                <th>Username</th>
+                <th>Email</th>
+                <th>Deleted Reason</th>
+                <th>Deleted At</th>
+              </tr>
+            </thead>
+            <tbody id="trashTable">
+              <!-- Deleted users will be loaded here -->
+            </tbody>
+          </table>
+        </div>
+        <div class="empty-state hidden" id="emptyState">
+          <div class="empty-icon">🗑</div>
+          <h3>No Deleted Users</h3>
+          <p>The trash is empty. Deleted users will appear here.</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+  <script>
+    // Sidebar functionality
+    const hamburger = document.getElementById('hamburger');
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('overlay');
+    
+    function toggleSidebar() {
+      sidebar.classList.toggle('open');
+      overlay.classList.toggle('active');
+    }
+    
+    hamburger.addEventListener('click', toggleSidebar);
+    overlay.addEventListener('click', toggleSidebar);
+    
+    // Theme toggle functionality
+    const themeToggle = document.getElementById('themeToggle');
+    const toggleSlider = document.getElementById('toggleSlider');
+    const themeIcon = document.getElementById('themeIcon');
+    
+    const savedTheme = localStorage.getItem('theme') || 'light';
+    document.documentElement.setAttribute('data-theme', savedTheme);
+    
+    if (savedTheme === 'dark') {
+      toggleSlider.classList.add('active');
+      themeIcon.textContent = '☀️';
+    }
+    
+    themeToggle.addEventListener('click', () => {
+      const currentTheme = document.documentElement.getAttribute('data-theme');
+      const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+      
+      document.documentElement.setAttribute('data-theme', newTheme);
+      localStorage.setItem('theme', newTheme);
+      
+      toggleSlider.classList.toggle('active');
+      themeIcon.textContent = newTheme === 'dark' ? '☀️' : '🌙';
+    });
+    
+    // Load deleted users
+    async function loadDeletedUsers() {
+      try {
+        const response = await fetch('/admin/trash/list', {credentials: 'include'});
+        
+        if (!response.ok) {
+          if (response.status === 401) {
+            window.location.href = '/admin';
+            return;
+          }
+          throw new Error('Failed to load deleted users');
+        }
+        
+        const data = await response.json();
+        const deletedUsers = data.deleted_users || [];
+        
+        const tbody = document.getElementById('trashTable');
+        const emptyState = document.getElementById('emptyState');
+        
+        if (deletedUsers.length === 0) {
+          tbody.innerHTML = '';
+          emptyState.classList.remove('hidden');
+        } else {
+          emptyState.classList.add('hidden');
+          tbody.innerHTML = deletedUsers.map(user => {
+            const profileImg = user.profile_image ? `/static/${user.profile_image}` : '/static/assets/add_profile.jpg';
+            return `
+            <tr>
+              <td>${user.id || 'N/A'}</td>
+              <td>
+                <div class="user-info">
+                  <img src="${profileImg}" alt="Profile" class="profile-img" onerror="this.src='/static/assets/add_profile.jpg'">
+                </div>
+              </td>
+              <td>${user.username || 'N/A'}</td>
+              <td>${user.email || 'N/A'}</td>
+              <td><span class="badge ${user.deleted_reason === 'admin_action' ? 'admin' : 'user'}">${user.deleted_reason || 'unknown'}</span></td>
+              <td>${user.deleted_at ? new Date(user.deleted_at).toLocaleString() : 'N/A'}</td>
+            </tr>
+            `;
+          }).join('');
+        }
+      } catch (error) {
+        console.error('Error loading deleted users:', error);
+        document.getElementById('emptyState').classList.remove('hidden');
+      }
+    }
+    
+    // Initialize
+    document.addEventListener('DOMContentLoaded', function() {
+      loadDeletedUsers();
+    });
+  </script>
+</body>
+</html>

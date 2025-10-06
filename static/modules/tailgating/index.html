@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tailgating Security Simulation</title>
+  <link rel="stylesheet" href="../shared/style.css" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="container">
+    <div class="page-header">
+      <div class="header-row">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-shield h-6 w-6 text-blue-600"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/></svg>
+        <h1>Tailgating Security Simulation</h1>
+      </div>
+      <p class="page-subtitle">Practice identifying and preventing tailgating attacks where unauthorized individuals follow authorized personnel through secure areas.</p>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">Choose a Tailgating Scenario</div>
+        <div class="card-desc">Select a scenario to practice your response to potential tailgating attempts</div>
+      </div>
+      <div class="card-content">
+        <div class="scenarios-grid">
+          <div class="scenario-card">
+            <div class="scenario-image">
+              <img src="images/office-building.jpg" alt="Office Building Entry" />
+            </div>
+            <div class="scenario-content">
+              <h3>Office Building Entry</h3>
+              <p>You're entering your office building with your access card</p>
+              <button class="btn scenario-btn">Start Scenario</button>
+            </div>
+          </div>
+
+          <div class="scenario-card">
+            <div class="scenario-image">
+              <img src="images/server-room.jpg" alt="Server Room Access" />
+            </div>
+            <div class="scenario-content">
+              <h3>Server Room Access</h3>
+              <p>You're accessing the secure server room for maintenance</p>
+              <button class="btn scenario-btn">Start Scenario</button>
+            </div>
+          </div>
+
+          <div class="scenario-card">
+            <div class="scenario-image">
+              <img src="images/delivery-access.jpg" alt="Delivery Access" />
+            </div>
+            <div class="scenario-content">
+              <h3>Delivery Access</h3>
+              <p>A delivery person needs access to your secure facility</p>
+              <button class="btn scenario-btn">Start Scenario</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">Understanding Tailgating Attacks</div>
+        <div class="card-desc">Learn about this common physical security threat and how to prevent it</div>
+      </div>
+      <div class="card-content">
+        <div class="grid two">
+          <div>
+            <h4 class="red-flags">What is Tailgating?</h4>
+            <p class="definition">Tailgating (or "piggybacking") is when an unauthorized person follows an authorized person into a restricted area without proper authentication.</p>
+            
+            <h4 class="red-flags">Common Tactics:</h4>
+            <ul class="list-dots red-dots">
+              <li>Carrying items to appear busy/legitimate</li>
+              <li>Wearing uniforms or business attire</li>
+              <li>Creating urgency or time pressure</li>
+              <li>Claiming to be new employees or contractors</li>
+            </ul>
+          </div>
+          <div>
+            <h4 class="green-tips">Prevention Strategies:</h4>
+            <ul class="list-dots green-dots">
+              <li>Always require proper authentication</li>
+              <li>Don't hold doors open for strangers</li>
+              <li>Verify identity through official channels</li>
+              <li>Report suspicious behavior to security</li>
+              <li>Follow company security policies</li>
+              <li>Trust your instincts if something feels wrong</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
+
+
