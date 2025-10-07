@@ -552,7 +552,7 @@ def enforce_session_timeout():
     # Skip checks for public and static endpoints
     if path.startswith("/static/") or path.startswith("/login/assets/"):
         return
-    if path in ("/login", "/signup", "/", "/admin", "/favicon.ico"):
+    if path in ("/login", "/signup", "/", "/super-admin_page", "/favicon.ico"):
         return
 
     lifetime = app.config.get('PERMANENT_SESSION_LIFETIME', timedelta(minutes=30))
@@ -592,10 +592,125 @@ def not_found_handler(e):
         return render_countdown(remaining)
 
     wants_json = "application/json" in (request.headers.get("Accept") or "")
-    msg = {"error": "Not Found", "path": request.path, "ip": ip}
-    return (jsonify(msg), 404) if wants_json else (f"Not Found: {request.path}", 404)
+    if wants_json:
+        return jsonify({"error": "Not Found", "path": request.path, "ip": ip}), 404
+    
+    # Try to render custom 404 template, fallback to inline HTML
+    try:
+        return render_template("404.html", path=request.path), 404
+    except Exception:
+        html = f"""
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Page Not Found - Security Platform</title>
+            <style>
+                * {{ margin: 0; padding: 0; box-sizing: border-box; }}
+                body {{ 
+                    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                    min-height: 100vh;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    color: #333;
+                }}
+                .container {{
+                    text-align: center;
+                    background: white;
+                    padding: 3rem 2rem;
+                    border-radius: 20px;
+                    box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+                    max-width: 500px;
+                    width: 90%;
+                }}
+                .error-code {{
+                    font-size: 6rem;
+                    font-weight: 700;
+                    color: #667eea;
+                    margin-bottom: 1rem;
+                    text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+                }}
+                .error-title {{
+                    font-size: 1.5rem;
+                    margin-bottom: 1rem;
+                    color: #2d3748;
+                }}
+                .error-message {{
+                    color: #718096;
+                    margin-bottom: 2rem;
+                    line-height: 1.6;
+                }}
+                .btn {{
+                    display: inline-block;
+                    padding: 12px 24px;
+                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                    color: white;
+                    text-decoration: none;
+                    border-radius: 25px;
+                    font-weight: 600;
+                    transition: transform 0.2s, box-shadow 0.2s;
+                    margin: 0 10px;
+                }}
+                .btn:hover {{
+                    transform: translateY(-2px);
+                    box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+                }}
+                .btn-outline {{
+                    background: transparent;
+                    color: #667eea;
+                    border: 2px solid #667eea;
+                }}
+                .btn-outline:hover {{
+                    background: #667eea;
+                    color: white;
+                }}
+                .path-info {{
+                    background: #f7fafc;
+                    padding: 1rem;
+                    border-radius: 8px;
+                    margin: 1rem 0;
+                    font-family: monospace;
+                    color: #4a5568;
+                    word-break: break-all;
+                }}
+                @media (max-width: 480px) {{
+                    .error-code {{ font-size: 4rem; }}
+                    .container {{ padding: 2rem 1rem; }}
+                    .btn {{ display: block; margin: 10px 0; }}
+                }}
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <div class="error-code">404</div>
+                <h1 class="error-title">🔍 Page Not Found</h1>
+                <p class="error-message">
+                    The page you're looking for seems to have vanished into the digital void.
+                    Don't worry, our security systems are still protecting you!
+                </p>
+                <div class="path-info">
+                    Requested: {request.path}
+                </div>
+                <div>
+                    <a href="/" class="btn">🏠 Go Home</a>
+                    <a href="javascript:history.back()" class="btn btn-outline">← Go Back</a>
+                </div>
+            </div>
+        </body>
+        </html>
+        """
+        return make_response(html, 404)
 
+@app.errorhandler(403)
+def forbidden_handler(e):
+    return jsonify({"error": "Forbidden", "message": "Access denied"}), 403
 
+@app.errorhandler(500)
+def internal_error_handler(e):
+    return jsonify({"error": "Internal Server Error", "message": "Something went wrong"}), 500
 
 # Admin password configuration
 ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "admin123")  # change this in production
@@ -650,8 +765,8 @@ def _save_admin_secret(new_password: str, is_primary: bool = True):
 
 ADMIN_PASSWORD_DATA = _load_admin_secret()
 
-@app.route("/admin", methods=["GET", "POST"])
-@app.route("/admin/login", methods=["GET", "POST"])
+@app.route("/super-admin_page", methods=["GET", "POST"])
+@app.route("/super-admin_page/login", methods=["GET", "POST"])
 def admin_login():
     # If already authenticated, show admin home
     if request.method == "GET" and session.get("admin"):
@@ -662,7 +777,10 @@ def admin_login():
         
         # Validate username must be exactly "admin"
         if username != "admin":
-            return render_template("admin_login.html", error="Invalid username or password")
+            try:
+                return render_template("admin_login.html", error="Invalid username or password")
+            except Exception:
+                return "<h1>Admin Login</h1><p>Invalid username or password</p><a href='/super-admin_page'>Try again</a>", 401
         
         if password:
             # Check both primary and secondary passwords
@@ -676,23 +794,38 @@ def admin_login():
                 session["last_activity"] = datetime.now(UTC).isoformat()
                 return redirect(url_for("admin_home"))
         
-        return render_template("admin_login.html", error="Invalid username or password")
-    return render_template("admin_login.html", error=None)
+        try:
+            return render_template("admin_login.html", error="Invalid username or password")
+        except Exception:
+            return "<h1>Admin Login</h1><p>Invalid username or password</p><a href='/super-admin_page'>Try again</a>", 401
+    
+    try:
+        return render_template("admin_login.html", error=None)
+    except Exception:
+        return """<h1>Admin Login</h1>
+        <form method='post'>
+            <p>Username: <input type='text' name='username' required></p>
+            <p>Password: <input type='password' name='password' required></p>
+            <p><button type='submit'>Login</button></p>
+        </form>"""
 
-@app.route("/admin/home")
+@app.route("/super-admin_page/home")
 def admin_home():
     if not session.get("admin"):
         return redirect(url_for("admin_login"))
-    return render_template("admin_home.html")
+    try:
+        return render_template("admin_home.html")
+    except Exception:
+        return "<h1>Admin Dashboard</h1><p>Welcome to admin panel</p><a href='/super-admin_page/logout'>Logout</a>"
 
-@app.route("/admin/dashboard")
+@app.route("/super-admin_page/dashboard")
 def blocked_dashboard():
     if not session.get("admin"):
         return redirect(url_for("admin_login"))
     # serve the blocked.html file (place it in same folder as app.py)
     return send_from_directory(os.path.dirname(__file__), "blocked.html")
 
-@app.route("/admin/excluded-ips")
+@app.route("/super-admin_page/excluded-ips")
 def excluded_ips_dashboard():
     if not session.get("admin"):
         return redirect(url_for("admin_login"))
@@ -876,7 +1009,7 @@ def export_blocked_data():
     
     return jsonify({"data": export_data}), 200
 
-@app.route("/admin/logout")
+@app.route("/super-admin_page/logout")
 def admin_logout():
     session.pop("admin", None)
     return redirect(url_for("admin_login"))
@@ -942,7 +1075,7 @@ def remove_excluded_ip():
     else:
         return jsonify({"error": "IP not found in exclusion list"}), 404
 
-@app.route("/admin/change-password", methods=["GET", "POST"])
+@app.route("/super-admin_page/change-password", methods=["GET", "POST"])
 def admin_change_password():
     if not session.get("admin"):
         return redirect(url_for("admin_login"))
@@ -1084,19 +1217,19 @@ def login_assets_js():
 # ----------------------------
 # Admin Users Dashboard (session-based admin only)
 # ----------------------------
-@app.route('/admin/users')
+@app.route('/super-admin_page/users')
 def admin_users():
     if not session.get('admin'):
         return redirect(url_for('admin_login'))
     return render_template('admin_users.html')
 
-@app.route('/admin/trash')
+@app.route('/super-admin_page/trash')
 def admin_trash():
     if not session.get('admin'):
         return redirect(url_for('admin_login'))
     return render_template('admin_trash.html')
 
-@app.route('/admin/users/list', methods=['GET'])
+@app.route('/super-admin_page/users/list', methods=['GET'])
 def admin_users_list():
     if not session.get('admin'):
         return jsonify({'error': 'Unauthorized'}), 401
@@ -1112,13 +1245,13 @@ def admin_users_list():
     ]
     return jsonify({'users': payload})
 
-@app.route('/admin/trash/list', methods=['GET'])
+@app.route('/super-admin_page/trash/list', methods=['GET'])
 def admin_trash_list():
     if not session.get('admin'):
         return jsonify({'error': 'Unauthorized'}), 401
     return jsonify({'deleted_users': _load_trash_records()})
 
-@app.route('/admin/users/<int:user_id>', methods=['POST'])
+@app.route('/super-admin_page/users/<int:user_id>', methods=['POST'])
 def admin_users_delete(user_id: int):
     if not session.get('admin'):
         return jsonify({'error': 'Unauthorized'}), 401
@@ -1141,7 +1274,7 @@ def admin_users_delete(user_id: int):
     db.session.commit()
     return jsonify({'message': 'User deleted'})
 
-@app.route('/admin/users/<int:user_id>/reset-password', methods=['POST'])
+@app.route('/super-admin_page/users/<int:user_id>/reset-password', methods=['POST'])
 def admin_reset_password(user_id: int):
     if not session.get('admin'):
         return jsonify({'error': 'Unauthorized'}), 401
@@ -1169,7 +1302,7 @@ def _generate_temp_password(length: int = 12) -> str:
         if any(c.isupper() for c in pwd) and any(c.islower() for c in pwd) and any(c.isdigit() for c in pwd):
             return pwd
 
-@app.route('/admin/users/<int:user_id>/set-temp-password', methods=['POST'])
+@app.route('/super-admin_page/users/<int:user_id>/set-temp-password', methods=['POST'])
 def admin_set_temp_password(user_id: int):
     if not session.get('admin'):
         return jsonify({'error': 'Unauthorized'}), 401
@@ -1344,9 +1477,189 @@ def serve_module(module_path):
             filename = os.path.basename(module_path)
             return send_from_directory(os.path.join(base_dir, rel_dir), filename)
 
-        return "Module not found", 404
+        # Return attractive module not found page
+        html = f"""
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Module Not Found - Security Platform</title>
+            <style>
+                * {{ margin: 0; padding: 0; box-sizing: border-box; }}
+                body {{ 
+                    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                    min-height: 100vh;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    color: #333;
+                }}
+                .container {{
+                    text-align: center;
+                    background: white;
+                    padding: 3rem 2rem;
+                    border-radius: 20px;
+                    box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+                    max-width: 500px;
+                    width: 90%;
+                }}
+                .error-icon {{
+                    font-size: 4rem;
+                    margin-bottom: 1rem;
+                    color: #667eea;
+                }}
+                .error-title {{
+                    font-size: 1.5rem;
+                    margin-bottom: 1rem;
+                    color: #2d3748;
+                }}
+                .error-message {{
+                    color: #718096;
+                    margin-bottom: 2rem;
+                    line-height: 1.6;
+                }}
+                .btn {{
+                    display: inline-block;
+                    padding: 12px 24px;
+                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                    color: white;
+                    text-decoration: none;
+                    border-radius: 25px;
+                    font-weight: 600;
+                    transition: transform 0.2s, box-shadow 0.2s;
+                    margin: 0 10px;
+                }}
+                .btn:hover {{
+                    transform: translateY(-2px);
+                    box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+                }}
+                .module-info {{
+                    background: #f7fafc;
+                    padding: 1rem;
+                    border-radius: 8px;
+                    margin: 1rem 0;
+                    font-family: monospace;
+                    color: #4a5568;
+                    word-break: break-all;
+                }}
+                @media (max-width: 480px) {{
+                    .container {{ padding: 2rem 1rem; }}
+                    .btn {{ display: block; margin: 10px 0; }}
+                }}
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <div class="error-icon">🧩</div>
+                <h1 class="error-title">Module Not Found</h1>
+                <p class="error-message">
+                    The security module you're looking for doesn't exist or has been moved.
+                    Please check the module name and try again.
+                </p>
+                <div class="module-info">
+                    Module: {module_path}
+                </div>
+            </div>
+        </body>
+        </html>
+        """
+        return make_response(html, 404)
     except Exception as e:
-        return f"Error loading module: {str(e)}", 404
+        # Return attractive error loading page
+        html = f"""
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Module Error - Security Platform</title>
+            <style>
+                * {{ margin: 0; padding: 0; box-sizing: border-box; }}
+                body {{ 
+                    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                    min-height: 100vh;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    color: #333;
+                }}
+                .container {{
+                    text-align: center;
+                    background: white;
+                    padding: 3rem 2rem;
+                    border-radius: 20px;
+                    box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+                    max-width: 500px;
+                    width: 90%;
+                }}
+                .error-icon {{
+                    font-size: 4rem;
+                    margin-bottom: 1rem;
+                    color: #ef4444;
+                }}
+                .error-title {{
+                    font-size: 1.5rem;
+                    margin-bottom: 1rem;
+                    color: #2d3748;
+                }}
+                .error-message {{
+                    color: #718096;
+                    margin-bottom: 2rem;
+                    line-height: 1.6;
+                }}
+                .btn {{
+                    display: inline-block;
+                    padding: 12px 24px;
+                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                    color: white;
+                    text-decoration: none;
+                    border-radius: 25px;
+                    font-weight: 600;
+                    transition: transform 0.2s, box-shadow 0.2s;
+                    margin: 0 10px;
+                }}
+                .btn:hover {{
+                    transform: translateY(-2px);
+                    box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+                }}
+                .error-details {{
+                    background: #fef2f2;
+                    padding: 1rem;
+                    border-radius: 8px;
+                    margin: 1rem 0;
+                    font-family: monospace;
+                    color: #991b1b;
+                    font-size: 0.875rem;
+                    word-break: break-all;
+                }}
+                @media (max-width: 480px) {{
+                    .container {{ padding: 2rem 1rem; }}
+                    .btn {{ display: block; margin: 10px 0; }}
+                }}
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <div class="error-icon">⚠️</div>
+                <h1 class="error-title">Module Loading Error</h1>
+                <p class="error-message">
+                    There was an error loading the security module.
+                    Please try again or contact support if the problem persists.
+                </p>
+                <div class="error-details">
+                    Error: {str(e)}
+                </div>
+                <div>
+                    <a href="/dashboard" class="btn">🏠 Back to Dashboard</a>
+                </div>
+            </div>
+        </body>
+        </html>
+        """
+        return make_response(html, 404)
 
 # API route for URL analysis with AI
 @app.route("/api/analyze-url", methods=["POST"])

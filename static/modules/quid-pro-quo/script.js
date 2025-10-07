@@ -22,6 +22,9 @@
     {
       question: "A coffee shop offers free WiFi but requires your email and phone number. What should you do?",
       scenario: "You're working remotely and need internet access. The sign says 'Free WiFi - Just provide email and phone for security'.",
+      risk_score: 3,
+      level: "beginner",
+      badge: "🪙 Rookie Defender",
       options: [
         { text: "Provide the information to get free WiFi", correct: false, explanation: "❌ Never trade personal information for free services. This is a common data harvesting tactic." },
         { text: "Use your mobile data instead", correct: true, explanation: "✅ Use your mobile hotspot or data plan. Your personal information is more valuable than free WiFi." },
@@ -32,6 +35,9 @@
     {
       question: "You receive a text offering a $50 gift card in exchange for completing a 'quick security survey'. How do you respond?",
       scenario: "The text includes a link and claims to be from a major retailer you shop at regularly.",
+      risk_score: 5,
+      level: "intermediate",
+      badge: "⚔️ Cyber Sleuth",
       options: [
         { text: "Click the link and complete the survey", correct: false, explanation: "❌ This is a classic quid pro quo scam. Legitimate companies don't offer gift cards via text surveys." },
         { text: "Ignore the message completely", correct: true, explanation: "✅ Delete and ignore. Legitimate offers come through official channels, not random texts." },
@@ -42,6 +48,9 @@
     {
       question: "A job recruiter offers you a high-paying position but needs your social security number for 'background verification'. What's your response?",
       scenario: "The recruiter contacted you via LinkedIn and the job seems legitimate with a well-known company name.",
+      risk_score: 8,
+      level: "advanced",
+      badge: "💼 Security Strategist",
       options: [
         { text: "Provide your SSN since it's for a job", correct: false, explanation: "❌ Never provide SSN via email or phone. Legitimate employers handle this through secure, official processes." },
         { text: "Ask to meet in person first", correct: true, explanation: "✅ Insist on meeting in person and verify the recruiter's identity before sharing any sensitive information." },
@@ -52,6 +61,9 @@
     {
       question: "A software download site offers a 'premium version' if you provide your work email and company name. What should you do?",
       scenario: "You need software for a work project and the site looks professional with good reviews.",
+      risk_score: 4,
+      level: "intermediate",
+      badge: "⚔️ Cyber Sleuth",
       options: [
         { text: "Provide the information for the premium version", correct: false, explanation: "❌ This is a data harvesting technique. Legitimate software doesn't require work details for free versions." },
         { text: "Download from the official software website", correct: true, explanation: "✅ Always download software from official sources. Avoid third-party sites that ask for personal information." },
@@ -62,6 +74,9 @@
     {
       question: "A survey company offers $100 for completing a 'market research' survey that asks for your bank account details. How do you respond?",
       scenario: "The email looks professional and claims to be from a legitimate market research company.",
+      risk_score: 9,
+      level: "advanced",
+      badge: "💼 Security Strategist",
       options: [
         { text: "Complete the survey for the money", correct: false, explanation: "❌ Legitimate surveys never ask for bank account details. This is a financial scam." },
         { text: "Delete the email immediately", correct: true, explanation: "✅ Delete immediately. No legitimate survey requires bank account information." },
@@ -72,6 +87,9 @@
     {
       question: "A mobile app offers free premium features if you 'verify your identity' with a photo of your driver's license. What's your response?",
       scenario: "The app has good ratings and claims the verification is for 'age verification' purposes.",
+      risk_score: 7,
+      level: "intermediate",
+      badge: "⚔️ Cyber Sleuth",
       options: [
         { text: "Upload the photo for free features", correct: false, explanation: "❌ Never share government ID photos with apps. This is identity theft waiting to happen." },
         { text: "Use the free version without verification", correct: true, explanation: "✅ Use the free version or find an alternative app that doesn't require ID verification." },
@@ -82,6 +100,9 @@
     {
       question: "A website offers free access to premium content if you provide your work computer's IP address. What should you do?",
       scenario: "The site claims to need your IP for 'security verification' to prevent unauthorized access.",
+      risk_score: 8,
+      level: "advanced",
+      badge: "💼 Security Strategist",
       options: [
         { text: "Provide the IP address for access", correct: false, explanation: "❌ Never share your work IP address. This could be used for network attacks." },
         { text: "Use a VPN and provide that IP instead", correct: false, explanation: "❌ Don't provide any IP address. Legitimate sites don't require this information." },
@@ -92,6 +113,9 @@
     {
       question: "A social media contest offers a prize if you provide your home address and phone number for 'delivery purposes'. How do you respond?",
       scenario: "The contest is from a brand you follow and the prize is something you really want.",
+      risk_score: 2,
+      level: "beginner",
+      badge: "🪙 Rookie Defender",
       options: [
         { text: "Provide the information to win the prize", correct: false, explanation: "❌ Legitimate contests don't require home addresses upfront. This is likely a data harvesting scam." },
         { text: "Use a P.O. Box address instead", correct: false, explanation: "❌ Even P.O. Box addresses can be used for tracking and profiling." },
@@ -102,6 +126,9 @@
     {
       question: "A tech support call offers to 'fix your computer for free' if you provide remote access and your password. What's your response?",
       scenario: "The caller claims to be from Microsoft and says your computer has been sending error reports.",
+      risk_score: 10,
+      level: "advanced",
+      badge: "💼 Security Strategist",
       options: [
         { text: "Provide access since it's free help", correct: false, explanation: "❌ This is a classic tech support scam. Microsoft never calls users unsolicited." },
         { text: "Hang up immediately", correct: true, explanation: "✅ Hang up immediately. Legitimate tech support never calls you first." },
@@ -112,6 +139,9 @@
     {
       question: "A website offers free software licenses if you provide your company's domain and number of employees. What should you do?",
       scenario: "The offer seems legitimate and the software would be useful for your team.",
+      risk_score: 6,
+      level: "intermediate",
+      badge: "⚔️ Cyber Sleuth",
       options: [
         { text: "Provide the information for free licenses", correct: false, explanation: "❌ This is corporate intelligence gathering. Legitimate software companies don't offer licenses this way." },
         { text: "Contact the software company directly", correct: true, explanation: "✅ Reach out to the software company through official channels to verify the offer." },
@@ -167,8 +197,9 @@
     const currentQuestionSpan = document.getElementById('current-question');
     const progressFill = document.getElementById('progress-fill');
 
-    // Update question text with translation
-    questionText.textContent = getTranslation(question.question);
+    // Update question text with translation and add difficulty badge
+    const difficultyBadge = `<span class="difficulty-badge ${question.level}">${question.badge}</span>`;
+    questionText.innerHTML = `${difficultyBadge} ${getTranslation(question.question)}`;
     questionScenario.textContent = getTranslation(question.scenario);
     currentQuestionSpan.textContent = currentQuestion + 1;
 

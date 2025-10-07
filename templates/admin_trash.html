@@ -75,12 +75,12 @@
   <nav class="sidebar" id="sidebar">
     <div class="sidebar-header"><h2>Navigation</h2></div>
     <div>
-      <a href="/admin/home" class="nav-item"><span>🏠</span> Admin Home</a>
-      <a href="/admin/users" class="nav-item"><span>👥</span> Users</a>
-      <a href="/admin/excluded-ips" class="nav-item"><span>🛡️</span> Excluded IPs</a>
-      <a href="/admin/trash" class="nav-item active"><span>🗑️</span> Trash</a>
-      <a href="/admin/change-password" class="nav-item"><span>🔑</span> Change Password</a>
-      <a href="/admin/logout" class="nav-item logout"><span>🚪</span> Logout</a>
+      <a href="/super-admin_page/home" class="nav-item"><span>🏠</span> Admin Home</a>
+      <a href="/super-admin_page/users" class="nav-item"><span>👥</span> Users</a>
+      <a href="/super-admin_page/excluded-ips" class="nav-item"><span>🛡️</span> Excluded IPs</a>
+      <a href="/super-admin_page/trash" class="nav-item active"><span>🗑️</span> Trash</a>
+      <a href="/super-admin_page/change-password" class="nav-item"><span>🔑</span> Change Password</a>
+      <a href="/super-admin_page/logout" class="nav-item logout"><span>🚪</span> Logout</a>
     </div>
     <div class="theme-toggle">
       <div class="toggle-switch" id="themeToggle">
@@ -164,11 +164,11 @@
     // Load deleted users
     async function loadDeletedUsers() {
       try {
-        const response = await fetch('/admin/trash/list', {credentials: 'include'});
+        const response = await fetch('/super-admin_page/trash/list', {credentials: 'include'});
         
         if (!response.ok) {
           if (response.status === 401) {
-            window.location.href = '/admin';
+            window.location.href = '/super-admin_page';
             return;
           }
           throw new Error('Failed to load deleted users');
