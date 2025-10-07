@@ -1,63 +1,69 @@
 <!doctype html>
 <html>
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Profile Settings</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-  <style>
-    *{box-sizing:border-box}
-    body{font-family:'Inter',sans-serif;background:#f8fafc;margin:0;padding:20px;color:#334155;line-height:1.5}
-    .container{max-width:1200px;margin:0 auto;background:#fff;border-radius:16px;box-shadow:0 4px 6px -1px rgba(0,0,0,.1),0 2px 4px -1px rgba(0,0,0,.06);overflow:hidden}
-    .header{background:linear-gradient(135deg,#3b82f6,#1d4ed8);color:#fff;padding:24px 32px;display:flex;justify-content:space-between;align-items:center}
-    .header h1{margin:0;font-size:28px;font-weight:600}
-    .nav-links{display:flex;gap:12px}
-    .nav-links a{color:#fff;text-decoration:none;padding:8px 16px;border-radius:8px;background:rgba(255,255,255,.1);transition:background .2s}
-    .nav-links a:hover{background:rgba(255,255,255,.2)}
-    .content{padding:32px}
-    .profile-grid{display:grid;grid-template-columns:1fr 2fr;gap:32px;align-items:start}
-    .card{background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:24px;box-shadow:0 1px 3px rgba(0,0,0,.1)}
-    .card h3{margin:0 0 16px;font-size:18px;font-weight:600;color:#1e293b}
-    .avatar-section{text-align:center}
-    .avatar-container{position:relative;display:inline-block;margin-bottom:16px}
-    .avatar{width:120px;height:120px;border-radius:50%;object-fit:cover;border:4px solid #e2e8f0;cursor:pointer;transition:all .3s}
-    .avatar-overlay{position:absolute;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.7);border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;opacity:0;transition:opacity .3s;cursor:pointer;font-size:12px;font-weight:500}
-    .avatar-container:hover .avatar-overlay{opacity:1}
-    .avatar-container:hover .avatar{transform:scale(1.05)}
-    .avatar-overlay svg{margin-bottom:4px}
-    .upload-btn{background:#3b82f6;color:#fff;border:none;padding:10px 20px;border-radius:8px;cursor:pointer;font-weight:500;transition:background .2s}
-    .upload-btn:hover{background:#2563eb}
-    .settings-section{display:flex;flex-direction:column;gap:24px}
-    .form-group{margin-bottom:16px}
-    .form-group label{display:block;margin-bottom:6px;font-weight:500;color:#374151}
-    .current-value{color:#6b7280;font-size:14px;margin-bottom:8px;padding:8px 12px;background:#f8fafc;border-radius:6px}
-    input[type="text"],input[type="password"]{width:100%;padding:12px;border:1px solid #d1d5db;border-radius:8px;font-size:14px;transition:border-color .2s}
-    input[type="text"]:focus,input[type="password"]:focus{outline:none;border-color:#3b82f6;box-shadow:0 0 0 3px rgba(59,130,246,.1)}
-    .btn{background:#3b82f6;color:#fff;border:none;padding:12px 24px;border-radius:8px;cursor:pointer;font-weight:500;transition:background .2s}
-    .btn:hover{background:#2563eb}
-    .btn-danger{background:#ef4444}
-    .btn-danger:hover{background:#dc2626}
-    .password-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
-    .message{margin-top:8px;font-size:14px;color:#6b7280}
-    .help-text{font-size:13px;color:#6b7280;margin-top:4px}
-    @media (max-width:768px){
-      .container{margin:10px;border-radius:12px}
-      .header{padding:20px;flex-direction:column;gap:16px;text-align:center}
-      .header h1{font-size:24px}
-      .nav-links{justify-content:center}
-      .content{padding:20px}
-      .profile-grid{grid-template-columns:1fr;gap:24px}
-      .password-grid{grid-template-columns:1fr}
-    }
-  </style>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Profile Settings</title>
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='../static/assets/logo.png') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        *{box-sizing:border-box}
+        body{font-family:'Inter',sans-serif;background:#f8fafc;margin:0;padding:20px;color:#334155;line-height:1.5}
+        .container{max-width:1200px;margin:0 auto;background:#fff;border-radius:16px;box-shadow:0 4px 6px -1px rgba(0,0,0,.1),0 2px 4px -1px rgba(0,0,0,.06);overflow:hidden}
+        .header{background:linear-gradient(135deg,#3b82f6,#1d4ed8);color:#fff;padding:24px 32px;display:flex;justify-content:space-between;align-items:center}
+        .header h1{margin:0;font-size:28px;font-weight:600}
+        .nav-links{display:flex;gap:12px}
+        .nav-links a{color:#fff;text-decoration:none;padding:8px 16px;border-radius:8px;background:rgba(255,255,255,.1);transition:background .2s}
+        .nav-links a:hover{background:rgba(255,255,255,.2)}
+        .content{padding:32px}
+        .profile-grid{display:grid;grid-template-columns:1fr 2fr;gap:32px;align-items:start}
+        .card{background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:24px;box-shadow:0 1px 3px rgba(0,0,0,.1)}
+        .card h3{margin:0 0 16px;font-size:18px;font-weight:600;color:#1e293b}
+        .avatar-section{text-align:center}
+        .avatar-container{position:relative;display:inline-block;margin-bottom:16px}
+        .avatar{width:120px;height:120px;border-radius:50%;object-fit:cover;border:4px solid #e2e8f0;cursor:pointer;transition:all .3s}
+        .avatar-overlay{position:absolute;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.7);border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;opacity:0;transition:opacity .3s;cursor:pointer;font-size:12px;font-weight:500}
+        .avatar-container:hover .avatar-overlay{opacity:1}
+        .avatar-container:hover .avatar{transform:scale(1.05)}
+        .avatar-overlay svg{margin-bottom:4px}
+        .upload-btn{background:#3b82f6;color:#fff;border:none;padding:10px 20px;border-radius:8px;cursor:pointer;font-weight:500;transition:background .2s}
+        .upload-btn:hover{background:#2563eb}
+        .settings-section{display:flex;flex-direction:column;gap:24px}
+        .form-group{margin-bottom:16px}
+        .form-group label{display:block;margin-bottom:6px;font-weight:500;color:#374151}
+        .current-value{color:#6b7280;font-size:14px;margin-bottom:8px;padding:8px 12px;background:#f8fafc;border-radius:6px}
+        input[type="text"],input[type="password"]{width:100%;padding:12px;border:1px solid #d1d5db;border-radius:8px;font-size:14px;transition:border-color .2s}
+        input[type="text"]:focus,input[type="password"]:focus{outline:none;border-color:#3b82f6;box-shadow:0 0 0 3px rgba(59,130,246,.1)}
+        .btn{background:#3b82f6;color:#fff;border:none;padding:12px 24px;border-radius:8px;cursor:pointer;font-weight:500;transition:background .2s}
+        .btn:hover{background:#2563eb}
+        .btn-danger{background:#ef4444}
+        .btn-danger:hover{background:#dc2626}
+        .password-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+        .message{margin-top:8px;font-size:14px;color:#6b7280}
+        .help-text{font-size:13px;color:#6b7280;margin-top:4px}
+        @media (max-width:768px){
+          .container{margin:10px;border-radius:12px}
+          .header{padding:20px;flex-direction:column;gap:16px;text-align:center}
+          .header h1{font-size:24px}
+          .nav-links{justify-content:center}
+          .content{padding:20px}
+          .profile-grid{grid-template-columns:1fr;gap:24px}
+          .password-grid{grid-template-columns:1fr}
+        }
+    </style>
 </head>
 <body>
   <div class="container">
     <div class="header">
-      <h1>Profile Settings</h1>
+        <a href="{{ url_for('back_home') }}" class="brand" style="text-decoration:none; color:white; display:flex; align-items:center;">
+            <img src="{{ url_for('static', filename='../static/assets/logo.png') }}"
+            alt="Habesha PDAT Logo"
+            class="logo" style="height:60px; vertical-align:middle;">
+            <span class="brand-text" style="font-size:20px; vertical-align:middle; margin-left:8px; font-weight: bold;">Habesha<br>PDAT</span>
+      </a>
+      <h1 style="flex:1; text-align:center; margin:0;">Profile Settings</h1>
       <div class="nav-links">
-        <a href="/dashboard">Dashboard</a>
-        <a href="/home">Home</a>
+        <a href="/dashboard" style="font-weight: bold;">Dashboard</a>
       </div>
     </div>
 
@@ -150,27 +156,27 @@
     // Avatar upload functionality
     const avatarContainer = $('.avatar-container');
     const fileInput = $('#fileInput');
-    
+
     avatarContainer.addEventListener('click', () => {
       fileInput.click();
     });
-    
+
     fileInput.addEventListener('change', async (e) => {
       const file = e.target.files[0];
       if (!file) return;
-      
+
       const formData = new FormData();
       formData.append('image', file);
-      
+
       try {
         const res = await fetch('/api/profile/image', {
           method: 'POST',
           body: formData,
           credentials: 'include'
         });
-        
+
         const result = await res.json();
-        
+
         if (res.ok) {
           $('#imgMsg').textContent = 'Profile picture updated successfully!';
           $('#imgMsg').style.color = '#059669';
@@ -185,7 +191,7 @@
         $('#imgMsg').textContent = 'Error uploading image';
         $('#imgMsg').style.color = '#dc2626';
       }
-      
+
       // Reset file input
       fileInput.value = '';
     });
@@ -210,6 +216,5 @@
   </script>
 </body>
 </html>
-
 
 
