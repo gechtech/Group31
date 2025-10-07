@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Security Awareness Training Platform</title>
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='../static/assets/logo.png') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='for_logo.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='index.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
@@ -12,7 +14,12 @@
     <div class="dashboard-layout">
         <aside class="sidebar" id="sidebar">
             <div class="sidebar-header">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-shield h-6 w-6 text-blue-600"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10"/></svg>
+                <a href="{{ url_for('back_home') }}" class="brand">
+                    <img src="{{ url_for('static', filename='../static/assets/logo.png') }}"
+                    alt="Habesha PDAT Logo"
+                    class="logo">
+                    <span class="brand-text">Habesha<br>PDAT</span>
+                </a>
                 <div class="text-lg font-bold text-gray-900">Security Awareness</div>
                 <div class="text-sm text-gray-600">Training Platform</div>
             </div>

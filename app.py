@@ -1443,7 +1443,7 @@ def dashboard_page():
 
 # Back to Home route (renders public landing for authenticated users as requested)
 @app.route("/home")
-@login_required
+# @login_required # I think here logging in is not necessary to get back to home. Should be able get back from anywhere, regardless of logging in or not
 def back_home():
     return render_template("dashboard.html", user=current_user)
 

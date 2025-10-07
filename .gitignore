@@ -1,0 +1,5 @@
+# Environment files
+.env
+
+# IDE config files (for JetBrains IDEs like PyCharm, WebStorm)
+.idea/
