@@ -27,7 +27,8 @@
         <label class="visually-hidden" for="v-phone">Phone Number</label>
         <input id="v-phone" type="tel" placeholder="+1-555-123-4567 or (555) 123-4567" />
         <div class="row">
-          <button id="btn-analyze" class="btn btn-primary col">Analyze Area Code</button>
+          <button
+           id="btn-analyze" class="btn btn-primary col">Analyze Area Code</button>
         </div>
         <div id="v-result" class="mt-3"></div>
       </div>
@@ -65,65 +66,58 @@
       </div>
     </div>
   </div>
-  <script>
+<script>
 (function(){
   const input = document.getElementById('v-phone');
   const result = document.getElementById('v-result');
 
   const scammerAreaCodes = {
-    // Caribbean Premium Rate Scams (Highest Risk)
-    '876': { risk: 10, location: 'Jamaica', reason: 'Lottery/prize scams, highest fraud rate globally' },
-    '809': { risk: 9, location: 'Dominican Republic', reason: 'Premium rate callback scams' },
-    '829': { risk: 9, location: 'Dominican Republic', reason: 'Premium rate callback scams' },
-    '849': { risk: 9, location: 'Dominican Republic', reason: 'Premium rate callback scams' },
-    '473': { risk: 9, location: 'Grenada', reason: 'Romance/lottery scams, high callback fees' },
-    '649': { risk: 8, location: 'Turks and Caicos', reason: 'Prize/sweepstakes callback scams' },
-    '284': { risk: 8, location: 'British Virgin Islands', reason: 'Investment/romance scams' },
-    '268': { risk: 8, location: 'Antigua', reason: 'Lottery/prize scams' },
-    '664': { risk: 7, location: 'Montserrat', reason: 'Prize callback scams' },
-    '767': { risk: 7, location: 'Dominica', reason: 'Sweepstakes scams' },
-    '758': { risk: 7, location: 'Saint Lucia', reason: 'Romance/lottery scams' },
-    '784': { risk: 7, location: 'Saint Vincent', reason: 'Prize scams' },
-    '787': { risk: 6, location: 'Puerto Rico', reason: 'Debt collection scams' },
-    '939': { risk: 6, location: 'Puerto Rico', reason: 'Tech support scams' },
-    
-    // US High-Risk Area Codes
-    '712': { risk: 8, location: 'Iowa', reason: 'Conference call/robocall scams' },
-    '605': { risk: 7, location: 'South Dakota', reason: 'Telemarketing/IRS scams' },
-    '218': { risk: 7, location: 'Minnesota', reason: 'IRS/tax scams' },
-    '701': { risk: 7, location: 'North Dakota', reason: 'Tech support/utility scams' },
-    '406': { risk: 6, location: 'Montana', reason: 'Medicare/health scams' },
-    '307': { risk: 6, location: 'Wyoming', reason: 'Social Security scams' },
-    '775': { risk: 6, location: 'Nevada', reason: 'Debt collection scams' },
-    '702': { risk: 5, location: 'Las Vegas, Nevada', reason: 'Timeshare/vacation scams' },
-    '786': { risk: 5, location: 'Miami, Florida', reason: 'Health insurance scams' },
-    '305': { risk: 5, location: 'Miami, Florida', reason: 'Credit card/loan scams' },
-    '954': { risk: 5, location: 'Fort Lauderdale, Florida', reason: 'Auto warranty scams' },
-    '561': { risk: 5, location: 'West Palm Beach, Florida', reason: 'Medicare scams' },
-    '407': { risk: 4, location: 'Orlando, Florida', reason: 'Vacation/timeshare scams' },
-    '813': { risk: 4, location: 'Tampa, Florida', reason: 'Home security scams' },
-    '727': { risk: 4, location: 'St. Petersburg, Florida', reason: 'Senior-targeted scams' },
-    '214': { risk: 4, location: 'Dallas, Texas', reason: 'Energy/utility scams' },
-    '469': { risk: 4, location: 'Dallas, Texas', reason: 'Robocall operations' },
-    '972': { risk: 4, location: 'Dallas, Texas', reason: 'Telemarketing scams' },
-    '713': { risk: 4, location: 'Houston, Texas', reason: 'Immigration scams' },
-    '832': { risk: 4, location: 'Houston, Texas', reason: 'Debt collection scams' },
-    '323': { risk: 4, location: 'Los Angeles, California', reason: 'Celebrity/entertainment scams' },
-    '213': { risk: 4, location: 'Los Angeles, California', reason: 'Immigration/legal scams' },
-    '818': { risk: 4, location: 'San Fernando Valley, California', reason: 'Tech support scams' },
-    '347': { risk: 4, location: 'New York City', reason: 'Rental/real estate scams' },
-    '929': { risk: 4, location: 'New York City', reason: 'Financial scams' },
-    '646': { risk: 4, location: 'Manhattan, New York', reason: 'Investment scams' }
+    '809': { risk: 9, location: 'Dominican Republic', reason: 'Premium rate scam calls' },
+    '91': { risk: 9, location: 'India (International)', reason: 'International premium rate/callback scams' },
+    '829': { risk: 9, location: 'Dominican Republic', reason: 'Premium rate scam calls' },
+    '849': { risk: 9, location: 'Dominican Republic', reason: 'Premium rate scam calls' },
+    '876': { risk: 10, location: 'Jamaica', reason: 'Lottery/prize scams, very high fraud rate' },
+    '473': { risk: 8, location: 'Grenada', reason: 'Romance/lottery scams' },
+    '649': { risk: 8, location: 'Turks and Caicos', reason: 'Prize/sweepstakes scams' },
+    '284': { risk: 7, location: 'British Virgin Islands', reason: 'Investment scams' },
+    '268': { risk: 7, location: 'Antigua', reason: 'Lottery scams' },
+    '664': { risk: 7, location: 'Montserrat', reason: 'Prize scams' },
+    '712': { risk: 8, location: 'Iowa', reason: 'Conference call scams, robocalls' },
+    '605': { risk: 7, location: 'South Dakota', reason: 'Telemarketing scams' },
+    '218': { risk: 6, location: 'Minnesota', reason: 'IRS/tax scams' },
+    '701': { risk: 6, location: 'North Dakota', reason: 'Tech support scams' },
+    '406': { risk: 6, location: 'Montana', reason: 'Utility scams' },
+    '307': { risk: 6, location: 'Wyoming', reason: 'Medicare scams' },
+    '775': { risk: 5, location: 'Nevada', reason: 'Debt collection scams' },
+    '702': { risk: 5, location: 'Nevada', reason: 'Timeshare scams' },
+    '786': { risk: 5, location: 'Florida', reason: 'Health insurance scams' },
+    '305': { risk: 5, location: 'Florida', reason: 'Credit card scams' }
   };
 
   function extractAreaCode(phone) {
     const digits = phone.replace(/\D/g, '');
     if (digits.length === 11 && digits.startsWith('1')) {
-      return digits.substring(1, 4);
+      const areaCode = digits.substring(1, 4);
+      if (areaCode.startsWith('9')) {
+        const twoDigit = areaCode.substring(0, 2);
+        if (scammerAreaCodes[twoDigit]) return twoDigit;
+      }
+      return areaCode;
     } else if (digits.length === 10) {
+      const areaCode = digits.substring(0, 3);
+      if (areaCode.startsWith('9')) {
+        const twoDigit = areaCode.substring(0, 2);
+        if (scammerAreaCodes[twoDigit]) return twoDigit;
+      }
+      return areaCode;
+    } else if (digits.length >= 2) {
+      if (digits.startsWith('9')) {
+        const twoDigit = digits.substring(0, 2);
+        if (scammerAreaCodes[twoDigit]) return twoDigit;
+      }
       return digits.substring(0, 3);
     }
-    return digits.substring(0, 3);
+    return null;
   }
 
   function analyzeAreaCode(phone) {
@@ -133,38 +127,80 @@
     }
 
     const areaCode = extractAreaCode(phone);
+    if (!areaCode) {
+      result.innerHTML = '<div class="status warn">Unable to identify area code. Please enter a complete phone number.</div>';
+      return;
+    }
+
     const scamData = scammerAreaCodes[areaCode];
-    
+
     if (scamData) {
       const statusClass = scamData.risk >= 8 ? 'err' : scamData.risk >= 6 ? 'warn' : 'ok';
       const riskLevel = scamData.risk >= 8 ? 'HIGH RISK' : scamData.risk >= 6 ? 'MEDIUM RISK' : 'LOW RISK';
-      
       result.innerHTML = `
         <div class="status ${statusClass}">
           <strong>Area Code Analysis: ${areaCode}</strong>
           <div class="mt-2"><strong>Location:</strong> ${scamData.location}</div>
           <div class="mt-2"><strong>Risk Level:</strong> ${riskLevel} (${scamData.risk}/10)</div>
           <div class="mt-2"><strong>Common Scam Type:</strong> ${scamData.reason}</div>
+          <div class="mt-2">
+            <strong>Recommendations:</strong>
+            <ul class="list-dots">
+              ${scamData.risk >= 8 ? 
+                '<li>DO NOT answer calls from this area code</li><li>Block this number immediately</li><li>Report to FTC if they called you</li>' :
+                scamData.risk >= 6 ?
+                '<li>Be extremely cautious - likely a scam</li><li>Never give personal information</li><li>Hang up and verify through official channels</li>' :
+                '<li>Exercise normal caution</li><li>Verify caller identity before sharing information</li>'
+              }
+            </ul>
+          </div>
         </div>
       `;
     } else {
-      result.innerHTML = `
-        <div class="status ok">
-          <strong>Area Code Analysis: ${areaCode}</strong>
-          <div class="mt-2"><strong>Risk Level:</strong> LOW RISK (2/10)</div>
-          <div class="mt-2"><strong>Status:</strong> This area code is not commonly associated with scam operations</div>
-          <div class="mt-2"><strong>Note:</strong> Scammers can still spoof any number - always verify caller identity</div>
-        </div>
-      `;
+      const isValidFormat = /^[2-9]\d{1,2}$/.test(areaCode);
+      if (isValidFormat) {
+        result.innerHTML = `
+          <div class="status ok">
+            <strong>Area Code Analysis: ${areaCode}</strong>
+            <div class="mt-2"><strong>Risk Level:</strong> LOW RISK (2/10)</div>
+            <div class="mt-2"><strong>Status:</strong> This area code is not commonly associated with scam operations</div>
+            <div class="mt-2">
+              <strong>Recommendations:</strong>
+              <ul class="list-dots">
+                <li>Exercise normal caution when answering</li>
+                <li>Still verify caller identity for sensitive requests</li>
+                <li>Be aware that scammers can spoof any number</li>
+              </ul>
+            </div>
+          </div>
+        `;
+      } else {
+        result.innerHTML = `
+          <div class="status warn">
+            <strong>Invalid Area Code: ${areaCode}</strong>
+            <div class="mt-2"><strong>Risk Level:</strong> MEDIUM RISK (5/10)</div>
+            <div class="mt-2"><strong>Issue:</strong> Invalid or non-standard area code format</div>
+            <div class="mt-2">
+              <strong>Recommendations:</strong>
+              <ul class="list-dots">
+                <li>Be suspicious of invalid area codes</li>
+                <li>This could indicate caller ID spoofing</li>
+                <li>Do not answer or provide any information</li>
+              </ul>
+            </div>
+          </div>
+        `;
+      }
     }
   }
 
+  // Run ONLY on button click
   document.getElementById('btn-analyze').addEventListener('click', function(){
     analyzeAreaCode(input.value);
   });
 
 })();
-  </script>
+</script>
 </body>
 </html>
 
