@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin - Phishing Emails</title>
+  <link rel="icon" type="image/png" href="{{ url_for('static', filename='../static/assets/logo.png') }}">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; }
+    
+    :root {
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --text: #1e293b;
+      --text-muted: #64748b;
+      --border: #e2e8f0;
+      --primary: #3b82f6;
+      --danger: #dc2626;
+      --warning: #f59e0b;
+      --success: #10b981;
+      --shadow: rgba(0,0,0,0.1);
+    }
+    
+    body {
+      font-family: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      margin: 0;
+      padding: 1.5rem;
+      color: var(--text);
+      line-height: 1.6;
+    }
+    
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      background: var(--card-bg);
+      border-radius: 12px;
+      box-shadow: 0 1px 3px var(--shadow);
+      padding: 1.5rem;
+    }
+    
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid var(--border);
+    }
+    
+    .header h1 {
+      margin: 0;
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: var(--text);
+    }
+    
+    .btn {
+      padding: 0.5rem 1rem;
+      background: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 500;
+      transition: background-color 0.2s;
+      margin-left: 0.5rem;
+    }
+    
+    .btn:hover { background: #2563eb; }
+    .btn-danger { background: var(--danger); }
+    .btn-danger:hover { background: #b91c1c; }
+    
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    
+    .stat-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1rem;
+      text-align: center;
+    }
+    
+    .stat-number {
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: var(--primary);
+      margin-bottom: 0.25rem;
+    }
+    
+    .stat-label {
+      color: var(--text-muted);
+      font-size: 0.875rem;
+    }
+    
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 1rem;
+      border-radius: 8px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+    }
+    
+    th, td {
+      padding: 0.75rem;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+    
+    th {
+      background: var(--bg);
+      font-weight: 600;
+      font-size: 0.875rem;
+      color: var(--text);
+    }
+    
+    td {
+      font-size: 0.875rem;
+    }
+    
+    .risk-high { color: var(--danger); font-weight: 600; }
+    .risk-medium { color: var(--warning); font-weight: 600; }
+    
+    .content-preview {
+      max-width: 300px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      color: var(--text-muted);
+    }
+  </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚨 Phishing Emails Detected</h1>
+            <div>
+                <a href="/super-admin_page/home" class="btn">← Back to Admin</a>
+                <button onclick="clearAll()" class="btn btn-danger">Clear All</button>
+            </div>
+        </div>
+        
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-number" id="total-count">0</div>
+                <div>Total Detected</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="high-risk-count">0</div>
+                <div>High Risk (≥8)</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="unique-emails">0</div>
+                <div>Unique Emails</div>
+            </div>
+        </div>
+
+        <table id="phishing-table">
+            <thead>
+                <tr>
+                    <th>Email</th>
+                    <th>Risk Score</th>
+                    <th>Content Preview</th>
+                    <th>Detected By</th>
+                    <th>Date</th>
+                </tr>
+            </thead>
+            <tbody id="phishing-list">
+                <tr><td colspan="5">Loading...</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        async function loadPhishingEmails() {
+            try {
+                const response = await fetch('/super-admin_page/phishing-emails/list');
+                const data = await response.json();
+                
+                if (data.phishing_emails) {
+                    displayPhishingEmails(data.phishing_emails);
+                    updateStats(data.phishing_emails);
+                }
+            } catch (error) {
+                document.getElementById('phishing-list').innerHTML = '<tr><td colspan="5">Error loading data</td></tr>';
+            }
+        }
+
+        function displayPhishingEmails(emails) {
+            const tbody = document.getElementById('phishing-list');
+            
+            if (emails.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5">No phishing emails detected yet</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = emails.map(email => `
+                <tr>
+                    <td><strong>${email.email}</strong></td>
+                    <td><span class="${email.risk_score >= 8 ? 'risk-high' : 'risk-medium'}">${email.risk_score}/10</span></td>
+                    <td class="content-preview" title="${email.content}">${email.content}</td>
+                    <td>${email.username} (ID: ${email.user_id})</td>
+                    <td>${new Date(email.detected_at).toLocaleString()}</td>
+                </tr>
+            `).join('');
+        }
+
+        function updateStats(emails) {
+            document.getElementById('total-count').textContent = emails.length;
+            document.getElementById('high-risk-count').textContent = emails.filter(e => e.risk_score >= 8).length;
+            document.getElementById('unique-emails').textContent = new Set(emails.map(e => e.email)).size;
+        }
+
+        async function clearAll() {
+            if (confirm('Are you sure you want to clear all phishing email records?')) {
+                // This would need a backend endpoint to clear the records
+                alert('Clear functionality would be implemented here');
+            }
+        }
+
+        // Load data on page load
+        loadPhishingEmails();
+        
+        // Refresh every 30 seconds
+        setInterval(loadPhishingEmails, 30000);
+    </script>
+</body>
+</html>

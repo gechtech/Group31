@@ -1,7 +1,7 @@
 from flask import Flask, request, jsonify, render_template, make_response, redirect, url_for, flash, send_from_directory, get_flashed_messages
 from flask_cors import CORS
 from collections import defaultdict, deque
-from datetime import datetime, timedelta, UTC
+from datetime import datetime, timedelta, timezone
 import threading, time, json, os, atexit
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -38,6 +38,7 @@ EXCLUDED_IPS_FILE     = "excluded_ips.json"  # File to store excluded IPs
 APP_DIR               = os.path.dirname(os.path.abspath(__file__))
 COMMENTS_FOLDER       = os.path.join(APP_DIR, "comments")
 TRASH_FILE            = os.path.join(APP_DIR, "trash.json")
+PHISHING_FILE         = os.path.join(APP_DIR, "phishing_emails.json")
 PROFILE_UPLOAD_DIR    = os.path.join(APP_DIR, "static", "assets", "profile_images")
 
 # Temporary password policy (admin-issued)
@@ -157,6 +158,24 @@ def _append_trash_record(record: dict):
     except Exception as e:
         print(f"[WARN] Failed to write trash file: {e}")
 
+def _load_phishing_records():
+    try:
+        if os.path.isfile(PHISHING_FILE):
+            with open(PHISHING_FILE, 'r', encoding='utf-8') as f:
+                return json.load(f)
+    except Exception:
+        pass
+    return []
+
+def _append_phishing_record(record: dict):
+    records = _load_phishing_records()
+    records.append(record)
+    try:
+        with open(PHISHING_FILE, 'w', encoding='utf-8') as f:
+            json.dump(records, f, indent=2)
+    except Exception as e:
+        print(f"[WARN] Failed to write phishing file: {e}")
+
 # ----------------------------
 # Data structures (thread-safe)
 # ----------------------------
@@ -168,7 +187,7 @@ lock     = threading.RLock()
 blocked_history = {}            # ip -> {"attempts": int, "records": [ { .. } ]}
 expired_blocks = []             # List of expired blocks for admin dashboard
 today_blocks_count = 0          # Count of blocks created today
-last_reset_date = datetime.now(UTC).date()  # Track when we last reset daily count
+last_reset_date = datetime.now(timezone.utc).date()  # Track when we last reset daily count
 excluded_ips = set()            # Set of IPs that should never be blocked
 
 # ----------------------------
@@ -190,7 +209,7 @@ def prune_window(dq, window, now):
         dq.popleft()
 
 def log_block(ip, reason, penalty):
-    line = f"{datetime.now(UTC).isoformat()} :: {ip} blocked for {penalty}s :: {reason}\n"
+    line = f"{datetime.now(timezone.utc).isoformat()} :: {ip} blocked for {penalty}s :: {reason}\n"
     with open("blocked_history.log", "a") as f:
         f.write(line)
 
@@ -362,14 +381,14 @@ def load_blocked():
             
             # Check if we need to reset daily count
             try:
-                saved_date = datetime.fromisoformat(data.get("last_reset", datetime.now(UTC).date().isoformat())).date()
-                if saved_date != datetime.now(UTC).date():
+                saved_date = datetime.fromisoformat(data.get("last_reset", datetime.now(timezone.utc).date().isoformat())).date()
+                if saved_date != datetime.now(timezone.utc).date():
                     today_blocks_count = 0
-                    last_reset_date = datetime.now(UTC).date()
+                    last_reset_date = datetime.now(timezone.utc).date()
                 else:
                     last_reset_date = saved_date
             except Exception:
-                last_reset_date = datetime.now(UTC).date()
+                last_reset_date = datetime.now(timezone.utc).date()
                 
     except Exception as e:
         print(f"[WARN] Failed to load blocked IPs: {e}")
@@ -397,7 +416,7 @@ if 'expired_blocks' not in globals():
 if 'today_blocks_count' not in globals():
     today_blocks_count = 0
 if 'last_reset_date' not in globals():
-    last_reset_date = datetime.now(UTC).date()
+    last_reset_date = datetime.now(timezone.utc).date()
 
 
 
@@ -405,7 +424,7 @@ def is_blocked(ip: str) -> int:
     with lock:
         info = blocked.get(ip)
         if not info: return 0
-        remain = int((info["until"] - datetime.now(UTC)).total_seconds())
+        remain = int((info["until"] - datetime.now(timezone.utc)).total_seconds())
         if remain <= 0:
             # Move to expired blocks before removing
             expired_block = {
@@ -413,7 +432,7 @@ def is_blocked(ip: str) -> int:
                 "penalty": info.get("penalty", 0),
                 "blocks": info.get("blocks", 1),
                 "reason": info.get("last_reason", "N/A"),
-                "expired_at": datetime.now(UTC).isoformat(),
+                "expired_at": datetime.now(timezone.utc).isoformat(),
                 "last_block_time": info.get("last_block_time", "")
             }
             expired_blocks.insert(0, expired_block)
@@ -435,7 +454,7 @@ def block_ip(ip: str, reason: str):
         global today_blocks_count, last_reset_date
         
         # Reset daily count if new day
-        current_date = datetime.now(UTC).date()
+        current_date = datetime.now(timezone.utc).date()
         if current_date != last_reset_date:
             today_blocks_count = 0
             last_reset_date = current_date
@@ -454,13 +473,13 @@ def block_ip(ip: str, reason: str):
             blocked[ip] = {"blocks": 1}
             today_blocks_count += 1  # Increment daily count for new IPs
 
-        until = datetime.now(UTC) + timedelta(seconds=penalty)
+        until = datetime.now(timezone.utc) + timedelta(seconds=penalty)
         block_info = {
             "until": until,
             "penalty": penalty,
             "blocks": blocked[ip]["blocks"],
             "last_reason": reason,
-            "last_block_time": datetime.now(UTC).isoformat()
+            "last_block_time": datetime.now(timezone.utc).isoformat()
         }
         blocked[ip].update(block_info)
 
@@ -560,7 +579,7 @@ def enforce_session_timeout():
     # Admin session timeout
     if session.get('admin'):
         last = session.get('last_activity')
-        now = datetime.now(UTC)
+        now = datetime.now(timezone.utc)
         try:
             last_dt = datetime.fromisoformat(last) if last else None
         except Exception:
@@ -574,7 +593,7 @@ def enforce_session_timeout():
     # User session timeout (Flask-Login)
     if current_user.is_authenticated:
         last = session.get('last_activity')
-        now = datetime.now(UTC)
+        now = datetime.now(timezone.utc)
         try:
             last_dt = datetime.fromisoformat(last) if last else None
         except Exception:
@@ -791,7 +810,7 @@ def admin_login():
                (secondary_hash and check_password_hash(secondary_hash, password)):
                 session["admin"] = True
                 session.permanent = True
-                session["last_activity"] = datetime.now(UTC).isoformat()
+                session["last_activity"] = datetime.now(timezone.utc).isoformat()
                 return redirect(url_for("admin_home"))
         
         try:
@@ -840,7 +859,7 @@ def blocked_ips_json():
         # Clean up expired blocks first
         expired_ips = []
         for ip in list(blocked.keys()):
-            remaining = max(0, int((blocked[ip]["until"] - datetime.now(UTC)).total_seconds()))
+            remaining = max(0, int((blocked[ip]["until"] - datetime.now(timezone.utc)).total_seconds()))
             if remaining <= 0:
                 # Move to expired
                 info = blocked[ip]
@@ -849,7 +868,7 @@ def blocked_ips_json():
                     "penalty": info.get("penalty", 0),
                     "blocks": info.get("blocks", 1),
                     "reason": info.get("last_reason", "N/A"),
-                    "expired_at": datetime.now(UTC).isoformat(),
+                    "expired_at": datetime.now(timezone.utc).isoformat(),
                     "last_block_time": info.get("last_block_time", "")
                 }
                 expired_blocks.insert(0, expired_block)
@@ -868,7 +887,7 @@ def blocked_ips_json():
         total_blocks_today = today_blocks_count
         
         for ip, info in blocked.items():
-            remaining = max(0, int((info["until"] - datetime.now(UTC)).total_seconds()))
+            remaining = max(0, int((info["until"] - datetime.now(timezone.utc)).total_seconds()))
             blocked_view[ip] = {
                 "penalty": info["penalty"],
                 "remaining": remaining,
@@ -910,12 +929,12 @@ def manual_block_ip():
         global today_blocks_count, last_reset_date
         
         # Reset daily count if new day
-        current_date = datetime.now(UTC).date()
+        current_date = datetime.now(timezone.utc).date()
         if current_date != last_reset_date:
             today_blocks_count = 0
             last_reset_date = current_date
         
-        until = datetime.now(UTC) + timedelta(seconds=penalty * 60)  # Convert minutes to seconds
+        until = datetime.now(timezone.utc) + timedelta(seconds=penalty * 60)  # Convert minutes to seconds
         is_new_ip = ip not in blocked
         
         blocked[ip] = {
@@ -923,7 +942,7 @@ def manual_block_ip():
             "penalty": penalty,
             "blocks": blocked.get(ip, {}).get("blocks", 0) + 1,
             "last_reason": reason,
-            "last_block_time": datetime.now(UTC).isoformat()
+            "last_block_time": datetime.now(timezone.utc).isoformat()
         }
         
         if is_new_ip:
@@ -957,7 +976,7 @@ def unblock_all_ips():
                 "penalty": info.get("penalty", 0),
                 "blocks": info.get("blocks", 1),
                 "reason": info.get("last_reason", "N/A") + " (Unblocked by admin)",
-                "expired_at": datetime.now(UTC).isoformat(),
+                "expired_at": datetime.now(timezone.utc).isoformat(),
                 "last_block_time": info.get("last_block_time", "")
             }
             expired_blocks.insert(0, expired_block)
@@ -984,7 +1003,7 @@ def export_blocked_data():
         
         # Add active blocks
         for ip, info in blocked.items():
-            remaining = max(0, int((info["until"] - datetime.now(UTC)).total_seconds()))
+            remaining = max(0, int((info["until"] - datetime.now(timezone.utc)).total_seconds()))
             export_data.append({
                 "ip": ip,
                 "status": "Active",
@@ -1045,7 +1064,7 @@ def add_excluded_ip():
                 "penalty": info.get("penalty", 0),
                 "blocks": info.get("blocks", 1),
                 "reason": info.get("last_reason", "N/A") + " (Added to exclusion list)",
-                "expired_at": datetime.now(UTC).isoformat(),
+                "expired_at": datetime.now(timezone.utc).isoformat(),
                 "last_block_time": info.get("last_block_time", "")
             }
             expired_blocks.insert(0, expired_block)
@@ -1143,7 +1162,7 @@ def login_page():
             if user.check_password(password):
                 login_user(user)
                 session.permanent = True
-                session["last_activity"] = datetime.now(UTC).isoformat()
+                session["last_activity"] = datetime.now(timezone.utc).isoformat()
                 next_page = request.args.get('next')
                 if next_page and urlparse(next_page).netloc == request.host:
                     return redirect(next_page)
@@ -1154,9 +1173,9 @@ def login_page():
                 # Ensure both datetimes are timezone-aware for comparison
                 expires_at = user.temp_password_expires_at
                 if expires_at.tzinfo is None:
-                    expires_at = expires_at.replace(tzinfo=UTC)
+                    expires_at = expires_at.replace(tzinfo=timezone.utc)
                 
-                if datetime.now(UTC) <= expires_at:
+                if datetime.now(timezone.utc) <= expires_at:
                     if check_password_hash(user.temp_password_hash, password):
                         # One-time use: immediately clear temp credentials
                         user.temp_password_hash = None
@@ -1164,7 +1183,7 @@ def login_page():
                         db.session.commit()
                         login_user(user)
                         session.permanent = True
-                        session["last_activity"] = datetime.now(UTC).isoformat()
+                        session["last_activity"] = datetime.now(timezone.utc).isoformat()
                         session['used_temp_password'] = True
                         next_page = request.args.get('next')
                         if next_page and urlparse(next_page).netloc == request.host:
@@ -1229,6 +1248,12 @@ def admin_trash():
         return redirect(url_for('admin_login'))
     return render_template('admin_trash.html')
 
+@app.route('/super-admin_page/phishing-emails')
+def admin_phishing_emails():
+    if not session.get('admin'):
+        return redirect(url_for('admin_login'))
+    return render_template('admin_phishing_emails.html')
+
 @app.route('/super-admin_page/users/list', methods=['GET'])
 def admin_users_list():
     if not session.get('admin'):
@@ -1251,6 +1276,47 @@ def admin_trash_list():
         return jsonify({'error': 'Unauthorized'}), 401
     return jsonify({'deleted_users': _load_trash_records()})
 
+@app.route('/super-admin_page/phishing-emails/list', methods=['GET'])
+def admin_phishing_list():
+    if not session.get('admin'):
+        return jsonify({'error': 'Unauthorized'}), 401
+    return jsonify({'phishing_emails': _load_phishing_records()})
+
+@app.route('/api/track-phishing', methods=['POST'])
+@login_required
+def track_phishing():
+    data = request.get_json()
+    email = data.get('email', '').strip()
+    content = data.get('content', '').strip()
+    risk_score = data.get('risk_score', 0)
+    
+    if email and risk_score >= 7:
+        record = {
+            'email': email,
+            'content': content,
+            'risk_score': risk_score,
+            'detected_at': datetime.now(timezone.utc).isoformat(),
+            'user_id': current_user.id,
+            'username': current_user.username
+        }
+        _append_phishing_record(record)
+    
+    return jsonify({'status': 'tracked'}), 200
+
+@app.route('/api/get-phishing-emails', methods=['POST'])
+@login_required
+def get_phishing_emails():
+    data = request.get_json()
+    email = data.get('email', '').strip()
+    
+    if not email:
+        return jsonify({'phishing_emails': []}), 200
+    
+    records = _load_phishing_records()
+    filtered_records = [r for r in records if r.get('email') == email]
+    
+    return jsonify({'phishing_emails': filtered_records}), 200
+
 @app.route('/super-admin_page/users/<int:user_id>', methods=['POST'])
 def admin_users_delete(user_id: int):
     if not session.get('admin'):
@@ -1265,7 +1331,7 @@ def admin_users_delete(user_id: int):
         'username': user.username,
         'email': user.email or '',
         'profile_image': user.profile_image or '',
-        'deleted_at': datetime.now(UTC).isoformat(),
+        'deleted_at': datetime.now(timezone.utc).isoformat(),
         'deleted_reason': 'admin_action'
     }
     _append_trash_record(trash_record)
@@ -1316,7 +1382,7 @@ def admin_set_temp_password(user_id: int):
     # Generate and store temp password (hashed) with expiry
     temp_plain = _generate_temp_password(12)
     user.temp_password_hash = generate_password_hash(temp_plain)
-    user.temp_password_expires_at = datetime.now(UTC) + timedelta(seconds=TEMP_PASSWORD_TTL_SECONDS)
+    user.temp_password_expires_at = datetime.now(timezone.utc) + timedelta(seconds=TEMP_PASSWORD_TTL_SECONDS)
     user.temp_password_grants = user.temp_password_grants + 1
     db.session.commit()
     # Return plaintext temp password so admin can share once
@@ -1398,7 +1464,7 @@ def api_delete_account():
         'username': current_user.username,
         'email': current_user.email or '',
         'profile_image': current_user.profile_image or '',
-        'deleted_at': datetime.now(UTC).isoformat(),
+        'deleted_at': datetime.now(timezone.utc).isoformat(),
         'deleted_reason': 'user_self_delete'
     }
     _append_trash_record(record)
@@ -2351,7 +2417,7 @@ def contact():
     if not name or not email or not message:
         return jsonify({"error": "All fields are required."}), 400
 
-    ts = datetime.now(UTC).strftime("%Y-%m-%dT%H-%M-%S")
+    ts = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H-%M-%S")
     path = os.path.join(COMMENTS_FOLDER, f"comment-{ts}.txt")
     with open(path, "w", encoding="utf-8") as f:
         f.write(f"Name: {name}\nEmail: {email}\nMessage: {message}\n")
@@ -2374,7 +2440,7 @@ def status():
         blocked_view = {
             ip: {
                 "penalty": info["penalty"],
-                "remaining": max(0, int((info["until"] - datetime.now(UTC)).total_seconds())),
+                "remaining": max(0, int((info["until"] - datetime.now(timezone.utc)).total_seconds())),
                 "blocks": info.get("blocks", 1),
                 "last_reason": info.get("last_reason", ""),
                 "last_block_time": info.get("last_block_time", "")
@@ -2416,7 +2482,7 @@ def remaining_time_for_ip(ip):
         info = blocked.get(ip)
         if not info:
             return jsonify({"remaining": 0}), 200
-        remain = int((info["until"] - datetime.now(UTC)).total_seconds())
+        remain = int((info["until"] - datetime.now(timezone.utc)).total_seconds())
         return jsonify({"remaining": max(0, remain)}), 200
 
 # Manual unblock endpoint for admins
@@ -2435,7 +2501,7 @@ def unblock(ip):
                 "penalty": info.get("penalty", 0),
                 "blocks": info.get("blocks", 1),
                 "reason": info.get("last_reason", "N/A") + " (Unblocked by admin)",
-                "expired_at": datetime.now(UTC).isoformat(),
+                "expired_at": datetime.now(timezone.utc).isoformat(),
                 "last_block_time": info.get("last_block_time", "")
             }
             expired_blocks.insert(0, expired_block)

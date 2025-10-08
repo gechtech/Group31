@@ -6,8 +6,8 @@
     --secondary-color-light: #6c757d;
     --card-background-light: #f8f9fa;
     --border-color-light: #dee2e6;
-    --navbar-bg-light: #ffffff;
-    --navbar-text-light: #333333;
+    --navbar-bg-light: #0f172a;
+    --navbar-text-light: #e2e8f0;
 }
 
 [data-theme="dark"] {
@@ -130,7 +130,13 @@ body {
 .hero-title {
     font-size: 60px;
     margin-bottom: 20px;
-    position: relative; /* For animation */
+    position: relative;
+    color: var(--primary-color-light);
+    text-shadow: none;
+}
+
+[data-theme="dark"] .hero-title {
+    color: white;
     text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
 }
 
