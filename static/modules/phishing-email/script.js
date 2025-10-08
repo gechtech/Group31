@@ -2,6 +2,10 @@
   const suspiciousKeywords = [
     "urgent","immediate","verify","suspend","click here","act now","limited time","congratulations","winner","free","prize","bank account","social security","password","login","confirm"
   ];
+  
+  const amharicKeywords = [
+    "አስቸኳይ","ወዲያውኑ","ያረጋግጡ","ያቁሙ","እዚህ ይጫኑ","አሁን ይንቀሳቀሱ","የተወሰነ ጊዜ","እንኳን ደስ አላችሁ","አሸናፊ","ነፃ","ሽልማት","የባንክ ሂሳብ","ማህበራዊ ደህንነት","የይለፍ ቃል","መግቢያ","ያረጋግጡ"
+  ];
 
   const emailAccount = document.getElementById('email-account');
   const emailContent = document.getElementById('email-content');
@@ -19,18 +23,19 @@
   }
 
   document.getElementById('btn-local').addEventListener('click', function(){
-    const language = LanguageUtils.getCurrentLanguage();
     const content = (emailContent.value || '').toLowerCase();
     
-    // Use appropriate keywords based on current page language
-    const keywords = language === 'amharic' ? [
-      "አስቸኳይ", "ወዲያውኑ", "ያረጋግጡ", "ያቁሙ", "እዚህ ይጫኑ", "አሁን ይንቀሳቀሱ", "የተወሰነ ጊዜ", "እንኳን ደስ አላችሁ", "አሸናፊ", "ነፃ", "ጽልማት", "የባንክ ሂሳብ", "ማህበራዊ ደህንነት", "የይለፍ ቃል", "መግቢያ", "ያረጋግጡ"
-    ] : suspiciousKeywords;
+    if (!content.trim()) {
+      localResult.innerHTML = '<div class="panel warn"><strong>Please enter email content to analyze</strong></div>';
+      return;
+    }
     
-    const found = keywords.filter(k => content.includes(k.toLowerCase()));
-    const score = found.length;
-    const suspicious = score >= 2;
-    renderLocal({ suspicious, keywords: found, score });
+    const englishFound = suspiciousKeywords.filter(k => content.includes(k));
+    const amharicFound = amharicKeywords.filter(k => content.includes(k));
+    const allFound = [...englishFound, ...amharicFound];
+    const score = Math.min(allFound.length * 2, 10);
+    const suspicious = allFound.length >= 2;
+    renderLocal({ suspicious, keywords: allFound, score });
   });
 
   function renderAI({ risk_score, reasoning, recommendations }){
