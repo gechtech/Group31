@@ -1,16 +1,7 @@
 {
   "active": {},
   "history": {},
-  "expired": [
-    {
-      "ip": "192.168.196.248",
-      "penalty": 20,
-      "blocks": 1,
-      "reason": "Flooding: 25 GETs in 15s",
-      "expired_at": "2025-10-06T08:59:37.601981+00:00",
-      "last_block_time": "2025-10-06T08:59:17.561200+00:00"
-    }
-  ],
+  "expired": [],
   "today_count": 0,
   "last_reset": "2025-10-08"
 }
