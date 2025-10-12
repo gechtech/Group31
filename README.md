@@ -1,4 +1,4 @@
-<<<<<<< HEAD
+
 # phishing-detector
 
 🔐 Phishing & Malicious Detection Platform
@@ -161,4 +161,4 @@ pip install -r requirements.txt
 Run the web application:
 
 python app.py
->>>>>>> ac313e37d6416b6f7056baf434463a31872bf8f7
+
