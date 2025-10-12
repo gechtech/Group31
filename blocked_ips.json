@@ -1,7 +1,29 @@
 {
   "active": {},
-  "history": {},
-  "expired": [],
-  "today_count": 0,
-  "last_reset": "2025-10-08"
+  "history": {
+    "127.0.0.1": {
+      "attempts": 1,
+      "records": [
+        {
+          "until": "2025-10-12T05:37:07.703485+00:00",
+          "penalty": 20,
+          "blocks": 1,
+          "last_reason": "Flooding: 25 GETs in 15s",
+          "last_block_time": "2025-10-12T05:36:47.703499+00:00"
+        }
+      ]
+    }
+  },
+  "expired": [
+    {
+      "ip": "127.0.0.1",
+      "penalty": 20,
+      "blocks": 1,
+      "reason": "Flooding: 25 GETs in 15s",
+      "expired_at": "2025-10-12T05:37:07.000708+00:00",
+      "last_block_time": "2025-10-12T05:36:47.703499+00:00"
+    }
+  ],
+  "today_count": 1,
+  "last_reset": "2025-10-12"
 }

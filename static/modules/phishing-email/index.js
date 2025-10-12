@@ -1,6 +1,34 @@
+
 (function(){
   const suspiciousKeywords = [
-    "urgent","immediate","verify","suspend","click here","act now","limited time","congratulations","winner","free","prize","bank account","social security","password","login","confirm"
+    // ===== English Keywords =====
+    "urgent","immediate","verify","suspend","click here","act now","limited time",
+    "congratulations","winner","free","prize","bank account","social security",
+    "password","login","confirm","gift","credit card","update","security alert",
+    "invoice","lottery","unusual activity","reset",
+
+    // ===== Amharic Keywords =====
+    "አሁኑኑ",          // Now / Immediately
+    "አስቸኳይ",          // Urgent
+    "እዚህ ጠቅ ያድርጉ",   // Click here
+    "ያስረጉ",          // Verify
+    "ያስተካክሉ",        // Update
+    "ያረጋግጡ",         // Confirm
+    "ማስታወቂያ",        // Alert
+    "የባንክ አካውንት",     // Bank account
+    "የድርሻ መለያ",      // Login/Account
+
+    // ===== Afaan Oromo Keywords =====
+    "amma",              // Now
+    "balleessi",         // Suspend/Block
+    "dhiheessi",         // Submit
+    "mirkaneessi",       // Verify/Confirm
+    "as tuqi",           // Click here
+    "gatii tola",        // Free
+    "gatii xiqqaa",      // Limited offer
+    "lakkoofsa baankii", // Bank account
+    "jecha darbii",      // Password
+    "dorgommii mo'ataa"  // Winner
   ];
 
   const emailAccount = document.getElementById('email-account');
@@ -8,6 +36,7 @@
   const apiKeyInput = document.getElementById('api-key');
   const localResult = document.getElementById('local-result');
   const aiResult = document.getElementById('ai-result');
+console.log("Matched keywords:", found);
 
   function renderLocal({ suspicious, keywords, score }){
     localResult.innerHTML = `
@@ -20,10 +49,17 @@
   }
 
   document.getElementById('btn-local').addEventListener('click', function(){
-    const content = (emailContent.value || '').toLowerCase();
-    const found = suspiciousKeywords.filter(k => content.includes(k.toLowerCase()));
+    const contentRaw = (emailContent.value || '');
+    const contentLower = contentRaw.toLowerCase();
+
+    // Match against both lowercase (for English) and raw text (for Amharic/Afaan Oromo)
+    const found = suspiciousKeywords.filter(k => {
+      const regex = new RegExp(k, "i"); // "i" makes it case-insensitive
+      return regex.test(contentRaw) || contentLower.includes(k.toLowerCase());
+    });
+
     const score = found.length;
-    const suspicious = score >= 2;
+    const suspicious = score >= 1;
     renderLocal({ suspicious, keywords: found, score });
   });
 
@@ -69,5 +105,3 @@
     }
   });
 })();
-
-
